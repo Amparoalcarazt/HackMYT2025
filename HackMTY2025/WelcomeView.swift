@@ -7,6 +7,7 @@
 
 import SwiftUI
 import FirebaseAuth  // backend
+import SwiftData
 
 struct WelcomeView: View {
     @State private var email = ""
