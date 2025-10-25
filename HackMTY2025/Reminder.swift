@@ -24,7 +24,7 @@ class Reminder {
         self.end = end
     }
     
-    func isAmountExceeded(by savings: Int) -> Bool {
+    func isReminderPassed(by savings: Int) -> Bool {
         return savings > amount
     }
 }
