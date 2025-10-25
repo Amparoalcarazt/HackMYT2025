@@ -16,6 +16,9 @@ struct WelcomeView: View {
             ZStack{
                 lightBlue
                     .ignoresSafeArea()
+                Image("LoginBg")
+                    .scaledToFit()
+                    .frame(maxWidth: .infinity)
                 VStack {
                     Image("HormigaLogo")
                         .frame(height: 120)
