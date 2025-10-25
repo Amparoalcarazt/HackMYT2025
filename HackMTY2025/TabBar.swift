@@ -16,7 +16,6 @@ struct TabBar: View {
             NavigationStack {
                 TDashboardView()
                     .navigationTitle("Dashboard")
-                
             }
             .tabItem { Label("Dashboard", systemImage: "house.fill") }
             
@@ -24,20 +23,20 @@ struct TabBar: View {
                 RemindersList()
                     .navigationTitle("Reminders")
             }
-            .tabItem { Label("Reminders", systemImage: "map.fill") }
+            .tabItem { Label("Reminders", systemImage: "bell.fill") }
             
             NavigationStack {
                 TDashboardView()
-                    .navigationTitle("Lotes")
+                    .navigationTitle("ChatBot")
             }
-            .tabItem { Label("Lotes", systemImage: "mappin") }
+            .tabItem { Label("ChatBot", systemImage: "bubble.left.fill") }
             
             // configurations
             NavigationStack {
                 TPerfilView()
-                    .navigationTitle("Perfil")
+                    .navigationTitle("Settings")
             }
-            .tabItem { Label("Perfil", systemImage: "person") }
+            .tabItem { Label("Settings", systemImage: "gearshape.fill") }
         }
         .tint(coolRed)
     }
