@@ -1,0 +1,58 @@
+cat > .gitignore << 'EOF'
+# Xcode
+build/
+DerivedData/
+*.xcuserdata/
+*.xcuserstate
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+*.xcworkspace/xcuserdata
+*.xcuserdatad
+
+# Swift Package Manager
+.build/
+Packages/
+Package.resolved
+.swiftpm/
+
+# CocoaPods
+Pods/
+*.xcworkspace
+
+# Carthage
+Carthage/Build/
+
+# Fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# iOS / macOS
+*.DS_Store
+*.ipa
+*.dSYM.zip
+*.dSYM
+
+# macOS metadata
+*.AppleDouble
+*.LSOverride
+
+# Environment files
+.env
+.env.*
+
+# Logs
+*.log
+
+# Playgrounds
+timeline.xctimeline
+playground.xcworkspace
+
+# SwiftData / CoreData
+*.sqlite
+*.sqlite-shm
+*.sqlite-wal
+EOF
+
