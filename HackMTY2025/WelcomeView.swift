@@ -124,4 +124,5 @@ struct WelcomeView: View {
 
 #Preview {
     WelcomeView()
+        .modelContainer(for: Reminder.self, inMemory: true)
 }
