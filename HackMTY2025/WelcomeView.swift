@@ -5,16 +5,20 @@
 //  Created by Amparo Alcaraz Tonella on 25/10/25.
 //
 
-
 import SwiftUI
-import SwiftData
+import FirebaseAuth  // backend
 
 struct WelcomeView: View {
-    @State private var user = ""
+    @State private var email = ""
     @State private var password = ""
+    @State private var showError = false  // para backend
+    @State private var errorMessage = ""  // para backend
+    @State private var isLoading = false  // para backend
+    @State private var isLoggedIn = false  // para backend
+    
     var body: some View {
-        NavigationStack{
-            ZStack{
+        NavigationStack {
+            ZStack {
                 lightBlue
                     .ignoresSafeArea()
                 Image("LoginBg")
@@ -29,41 +33,92 @@ struct WelcomeView: View {
                     Text("Welcome to CrumbTrail")
                     
                     VStack(alignment: .center, spacing: 20) {
-                        TextField("Username", text: $user)
+                        TextField("Email", text: $email)
                             .textFieldStyle(.roundedBorder)
+                            .autocapitalization(.none)  // backend
+                            .keyboardType(.emailAddress)  // backend
                         
-                        TextField("Password", text: $password)
+                        SecureField("Password", text: $password)
                             .textFieldStyle(.roundedBorder)
                     }
                     
+                    // mensaje de error
+                    if showError {
+                        Text(errorMessage)
+                            .foregroundColor(.red)
+                            .font(.caption)
+                            .multilineTextAlignment(.center)
+                            .padding(.horizontal)
+                    }
                     
-                    NavigationLink(destination: ContentView()){
-                        HStack(){
+                    // forgot password
+                    NavigationLink(destination: ContentView()) {
+                        HStack() {
                             Text("Forgot your password?")
                                 .foregroundStyle(midBlue)
                             Spacer()
                         }
                     }
                     
-                    NavigationLink(destination: TabBar() .navigationBarBackButtonHidden(true)) {
-                        
-                        Text("Sign in")
-                            .padding(10)
-                            .padding(.horizontal, 10)
-                            .foregroundStyle(.white)
-                            .background(midBlue)
-                            .cornerRadius(20)
+                    // sign in button
+                    Button(action: signIn) {
+                        if isLoading {
+                            ProgressView()
+                                .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                        } else {
+                            Text("Sign in")
+                                .padding(10)
+                                .padding(.horizontal, 10)
+                                .foregroundStyle(.white)
+                        }
                     }
+                    .background(midBlue)
+                    .cornerRadius(20)
+                    .disabled(isLoading)
                     .padding()
-                    NavigationLink(destination: ContentView()){
-                        Text("Dont have an accound? Sign up!")
+                    
+                    // sign up link
+                    NavigationLink(destination: SignUpView()) {
+                        Text("Don't have an account? Sign up!")
                             .foregroundStyle(midBlue)
                     }
                 }
                 .padding(.horizontal, 50)
             }
+            // NAVEGACION CUANDO LOGIN EXITOSO
+            .navigationDestination(isPresented: $isLoggedIn) {
+                ContentView()  // pantalla principal después del login -> home
+            }
+        }
+    }
+    
+    // backend
+    func signIn() {
+        // validar que los campos no estén vacíos
+        guard !email.isEmpty, !password.isEmpty else {
+            errorMessage = "Please fill in all fields"
+            showError = true
+            return
         }
         
+        isLoading = true
+        showError = false
+        
+        // llamar a Firebase Authentication
+        Auth.auth().signIn(withEmail: email, password: password) { result, error in
+            isLoading = false
+            
+            if let error = error {
+                // mostrar error
+                errorMessage = error.localizedDescription
+                showError = true
+                return
+            }
+            
+            // usuario logueado
+            print("User signed in: \(result?.user.email ?? "")")
+            isLoggedIn = true
+        }
     }
 }
 
