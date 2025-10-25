@@ -7,6 +7,7 @@
 
 
 import SwiftUI
+import SwiftData
 
 struct TabBar: View {
     @State private var searchText = ""
@@ -15,38 +16,26 @@ struct TabBar: View {
             NavigationStack {
                 TDashboardView()
                     .navigationTitle("Dashboard")
-                    .toolbarColorScheme(.dark, for: .navigationBar)
-                    .toolbarBackground(midBlue, for: .navigationBar)
-                    .toolbarBackground(.visible, for: .navigationBar)
-                    .navigationBarTitleDisplayMode(.inline)
+                
             }
             .tabItem { Label("Dashboard", systemImage: "house.fill") }
             
             NavigationStack {
-                TDashboardView()
-                    .navigationTitle("Fincas").toolbarColorScheme(.dark, for: .navigationBar)
-                    .toolbarBackground(midBlue, for: .navigationBar)
-                    .toolbarBackground(.visible, for: .navigationBar)
-                    .navigationBarTitleDisplayMode(.inline)
+                RemindersList()
+                    .navigationTitle("Reminders")
             }
-            .tabItem { Label("Fincas", systemImage: "map.fill") }
+            .tabItem { Label("Reminders", systemImage: "map.fill") }
             
             NavigationStack {
                 TDashboardView()
-                    .navigationTitle("Lotes").toolbarColorScheme(.dark, for: .navigationBar)
-                    .toolbarBackground(midBlue, for: .navigationBar)
-                    .toolbarBackground(.visible, for: .navigationBar)
-                    .navigationBarTitleDisplayMode(.inline)
+                    .navigationTitle("Lotes")
             }
             .tabItem { Label("Lotes", systemImage: "mappin") }
             
             // configurations
             NavigationStack {
                 TPerfilView()
-                    .navigationTitle("Perfil").toolbarColorScheme(.dark, for: .navigationBar)
-                    .toolbarBackground(midBlue, for: .navigationBar)
-                    .toolbarBackground(.visible, for: .navigationBar)
-                    .navigationBarTitleDisplayMode(.inline)
+                    .navigationTitle("Perfil")
             }
             .tabItem { Label("Perfil", systemImage: "person") }
         }
@@ -75,4 +64,5 @@ struct TPerfilView: View {
 }
 #Preview {
     TabBar()
+        .modelContainer(for: Reminder.self, inMemory: true)
 }
