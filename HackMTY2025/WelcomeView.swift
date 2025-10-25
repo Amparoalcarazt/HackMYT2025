@@ -7,6 +7,7 @@
 
 
 import SwiftUI
+import SwiftData
 
 struct WelcomeView: View {
     @State private var user = ""
@@ -44,7 +45,8 @@ struct WelcomeView: View {
                         }
                     }
                     
-                    NavigationLink(destination: ContentView()){
+                    NavigationLink(destination: TabBar() .navigationBarBackButtonHidden(true)) {
+                        
                         Text("Sign in")
                             .padding(10)
                             .padding(.horizontal, 10)
@@ -67,4 +69,5 @@ struct WelcomeView: View {
 
 #Preview {
     WelcomeView()
+        .modelContainer(for: Reminder.self, inMemory: true)
 }
