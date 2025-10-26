@@ -7,13 +7,20 @@
 
 import SwiftUI
 import FirebaseCore
+import FirebaseFirestore
 
 @main
 struct HackMTY2025App: App {
     
     init() {
-            FirebaseApp.configure()
-        }
+        FirebaseApp.configure()
+        
+        // habilitar persistencia offline
+        let settings = FirestoreSettings()
+        settings.isPersistenceEnabled = true
+        settings.cacheSizeBytes = FirestoreCacheSizeUnlimited
+        Firestore.firestore().settings = settings
+    }
     
     var body: some Scene {
         WindowGroup {

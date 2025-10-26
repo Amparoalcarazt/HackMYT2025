@@ -2,8 +2,6 @@
 //  FirebaseService.swift
 //  HackMTY2025
 //
-//  Created by AGRM on 26/10/25.
-//
 
 import Foundation
 import FirebaseFirestore
@@ -13,48 +11,153 @@ class FirebaseService {
     static let shared = FirebaseService()
     private let db = Firestore.firestore()
     
+    // MARK: - Get User Profile
+    func getUserProfile() async throws -> UserProfile {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            print("❌ No user authenticated")
+            throw FirebaseError.noUser
+        }
+        
+        print("🔍 Fetching profile for user: \(userId)")
+        
+        do {
+            let doc = try await db.collection("users").document(userId).getDocument()
+            
+            if doc.exists {
+                if let profile = try? doc.data(as: UserProfile.self) {
+                    print("✅ Profile found: \(profile.fullName)")
+                    return profile
+                }
+            }
+            
+            // Si no existe, crear perfil con datos mock
+            print("⚠️ Profile not found, creating new one with mock data...")
+            return try await createUserProfile(userId: userId)
+            
+        } catch {
+            print("❌ Error fetching profile: \(error.localizedDescription)")
+            
+            // Si falla por estar offline, crear perfil local
+            print("📱 Creating local profile with mock data...")
+            return try await createUserProfile(userId: userId)
+        }
+    }
+    
+    // MARK: - Create User Profile con datos MOCK
+    private func createUserProfile(userId: String) async throws -> UserProfile {
+        guard let currentUser = Auth.auth().currentUser else {
+            throw FirebaseError.noUser
+        }
+        
+        print("🎨 Creating mock data for user: \(userId)")
+        
+        // Obtener nombre del usuario
+        let displayName = currentUser.displayName ?? currentUser.email ?? "User"
+        let nameParts = displayName.components(separatedBy: " ")
+        let firstName = nameParts.first ?? "John"
+        let lastName = nameParts.count > 1 ? nameParts.dropFirst().joined(separator: " ") : "Doe"
+        
+        // Crear perfil con datos mock
+        let profile = UserProfile(
+            userId: userId,
+            firstName: firstName,
+            lastName: lastName,
+            email: currentUser.email ?? "",
+            balance: 1572.33,
+            lastUpdated: Date()
+        )
+        
+        // Intentar guardar en Firestore
+        do {
+            try db.collection("users").document(userId).setData(from: profile)
+            print("✅ Profile saved to Firestore")
+        } catch {
+            print("⚠️ Could not save to Firestore (might be offline): \(error.localizedDescription)")
+        }
+        
+        // Crear purchases mock
+        await createMockPurchases(userId: userId)
+        
+        return profile
+    }
+    
+    // MARK: - Create Mock Purchases
+    private func createMockPurchases(userId: String) async {
+        let samplePurchases = [
+            Purchase(
+                userId: userId,
+                merchantName: "Oxxo",
+                amount: 704.12,
+                category: "Groceries",
+                date: Date().addingTimeInterval(-86400 * 2),
+                description: "Grocery shopping"
+            ),
+            Purchase(
+                userId: userId,
+                merchantName: "CFE",
+                amount: 1200.00,
+                category: "Bills",
+                date: Date().addingTimeInterval(-86400 * 5),
+                description: "Electricity bill"
+            ),
+            Purchase(
+                userId: userId,
+                merchantName: "Pemex",
+                amount: 340.33,
+                category: "Gas",
+                date: Date().addingTimeInterval(-86400 * 1),
+                description: "Gas refill"
+            ),
+            Purchase(
+                userId: userId,
+                merchantName: "Starbucks",
+                amount: 272.02,
+                category: "Dining",
+                date: Date().addingTimeInterval(-86400 * 3),
+                description: "Coffee and breakfast"
+            )
+        ]
+        
+        for purchase in samplePurchases {
+            do {
+                try db.collection("purchases").addDocument(from: purchase)
+                print("✅ Purchase created: \(purchase.merchantName)")
+            } catch {
+                print("⚠️ Could not save purchase (might be offline): \(error.localizedDescription)")
+            }
+        }
+    }
+    
     // MARK: - Get User Balance
     func getUserBalance() async throws -> Double {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            throw FirebaseError.noUser
-        }
-        
-        let doc = try await db.collection("users").document(userId).getDocument()
-        
-        if let data = doc.data(), let balance = data["balance"] as? Double {
-            return balance
-        }
-        
-        // Si no existe, crear con balance inicial
-        try await createUserData(userId: userId)
-        return 1572.33 // Balance inicial
+        let profile = try await getUserProfile()
+        return profile.balance
     }
     
-    // MARK: - Update Balance
-    func updateBalance(_ newBalance: Double) async throws {
-        guard let userId = Auth.auth().currentUser?.uid else {
-            throw FirebaseError.noUser
-        }
-        
-        try await db.collection("users").document(userId).setData([
-            "balance": newBalance,
-            "lastUpdated": Timestamp(date: Date())
-        ], merge: true)
-    }
-    
-    // MARK: - Get All Purchases
+    // MARK: - Get Purchases
     func getPurchases() async throws -> [Purchase] {
         guard let userId = Auth.auth().currentUser?.uid else {
             throw FirebaseError.noUser
         }
         
-        let snapshot = try await db.collection("purchases")
-            .whereField("userId", isEqualTo: userId)
-            .order(by: "date", descending: true)
-            .getDocuments()
+        print("🔍 Fetching purchases for user: \(userId)")
         
-        return snapshot.documents.compactMap { doc in
-            try? doc.data(as: Purchase.self)
+        do {
+            let snapshot = try await db.collection("purchases")
+                .whereField("userId", isEqualTo: userId)
+                .order(by: "date", descending: true)
+                .getDocuments()
+            
+            let purchases = snapshot.documents.compactMap { doc in
+                try? doc.data(as: Purchase.self)
+            }
+            
+            print("✅ Found \(purchases.count) purchases")
+            return purchases
+            
+        } catch {
+            print("❌ Error fetching purchases: \(error.localizedDescription)")
+            return []
         }
     }
     
@@ -80,26 +183,16 @@ class FirebaseService {
         try await updateBalance(currentBalance - amount)
     }
     
-    // MARK: - Create User Data
-    private func createUserData(userId: String) async throws {
-        let userData: [String: Any] = [
-            "balance": 1572.33,
-            "lastUpdated": Timestamp(date: Date())
-        ]
-        
-        try await db.collection("users").document(userId).setData(userData)
-        
-        // Crear purchases de ejemplo
-        let samplePurchases = [
-            Purchase(userId: userId, merchantName: "Oxxo", amount: 45.50, category: "Groceries", date: Date()),
-            Purchase(userId: userId, merchantName: "Starbucks", amount: 98.00, category: "Dining", date: Date()),
-            Purchase(userId: userId, merchantName: "Pemex", amount: 340.33, category: "Gas", date: Date()),
-            Purchase(userId: userId, merchantName: "CFE", amount: 1200.00, category: "Bills", date: Date())
-        ]
-        
-        for purchase in samplePurchases {
-            try db.collection("purchases").addDocument(from: purchase)
+    // MARK: - Update Balance
+    func updateBalance(_ newBalance: Double) async throws {
+        guard let userId = Auth.auth().currentUser?.uid else {
+            throw FirebaseError.noUser
         }
+        
+        try await db.collection("users").document(userId).setData([
+            "balance": newBalance,
+            "lastUpdated": Timestamp(date: Date())
+        ], merge: true)
     }
     
     // MARK: - Delete Purchase

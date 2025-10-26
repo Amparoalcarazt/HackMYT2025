@@ -1,3 +1,8 @@
+//
+//  HomeView.swift
+//  HackMTY2025
+//
+
 import SwiftUI
 import FirebaseAuth
 
@@ -64,11 +69,38 @@ struct HomeContentView: View {
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                // Welcome message
-                Text("Welcome \(userName)!")
-                    .font(.system(size: 30, weight: .bold))
-                    .padding(.top, 10)
-                    .offset(y: 32)
+                /*DEBUG: Verificar usuario (agregar AQUÍ)
+                           if let user = Auth.auth().currentUser {
+                               VStack(spacing: 4) {
+                                   Text("🔐 Logged in as:")
+                                       .font(.caption)
+                                       .foregroundColor(.gray)
+                                   Text(user.email ?? "Unknown")
+                                       .font(.caption)
+                                       .foregroundColor(.blue)
+                                   Text("UID: \(user.uid)")
+                                       .font(.system(size: 10))
+                                       .foregroundColor(.gray)
+                               }
+                               .padding(.vertical, 8)
+                               .background(Color.yellow.opacity(0.2))
+                               .cornerRadius(10)
+                               .padding(.horizontal)
+                           } else {
+                               Text("⚠️ No user logged in")
+                                   .font(.caption)
+                                   .foregroundColor(.red)
+                                   .padding()
+                                   .background(Color.red.opacity(0.1))
+                                   .cornerRadius(10)
+                           }*/
+                           
+                           // Welcome message - CON NOMBRE COMPLETO
+                           Text("Hello \(viewModel.userFullName)!")
+                               .font(.system(size: 30, weight: .bold))
+                               .padding(.top, 10)
+                               .offset(y: 32)
+            
                 
                 ZStack {
                     Image("trailHome2")
@@ -139,7 +171,7 @@ struct HomeContentView: View {
                     .padding(.bottom, 20)
                 }
                 
-                // Spending amounts - CORREGIDO ✅
+                // Spending amounts
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
                     SpendingCard(
                         icon: "cart.fill",
@@ -191,13 +223,6 @@ struct HomeContentView: View {
         .refreshable {
             await viewModel.loadData()
         }
-    }
-    
-    private var userName: String {
-        if let user = Auth.auth().currentUser {
-            return user.displayName ?? user.email?.components(separatedBy: "@").first?.capitalized ?? "User"
-        }
-        return "User"
     }
 }
 
