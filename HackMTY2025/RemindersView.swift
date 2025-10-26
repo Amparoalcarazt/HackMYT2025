@@ -7,7 +7,7 @@
 import SwiftUI
 import SwiftData
 
-struct RemindersList: View {
+struct RemindersView: View {
     @Query(sort: \Reminder.start)private var reminders: [Reminder]
     @Environment(\.modelContext) private var context
     @State private var newAmount = 0
@@ -53,6 +53,6 @@ struct RemindersList: View {
 
 
 #Preview {
-    RemindersList()
+    RemindersView()
         .modelContainer(for: Reminder.self, inMemory: true)
 }

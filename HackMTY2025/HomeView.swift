@@ -1,4 +1,6 @@
+
 import SwiftUI
+import FirebaseAuth
 
 struct HomeView: View {
     @State private var selectedView = 0 // 0 = Home, 1 = Stats
@@ -17,7 +19,7 @@ struct HomeView: View {
                         .foregroundColor(selectedView == 0 ? .white : .gray)
                         .frame(maxWidth: .infinity)
                         .frame(height: 40)
-                        .background(selectedView == 0 ? Color.darkBlue : Color.clear)
+                        .background(selectedView == 0 ? Color.blue : Color.clear)
                         .clipShape(Capsule())
                 }
                 
@@ -31,7 +33,7 @@ struct HomeView: View {
                         .foregroundColor(selectedView == 1 ? .white : .gray)
                         .frame(maxWidth: .infinity)
                         .frame(height: 40)
-                        .background(selectedView == 1 ? Color.darkBlue : Color.clear)
+                        .background(selectedView == 1 ? Color.blue : Color.clear)
                         .clipShape(Capsule())
                 }
             }
@@ -67,18 +69,19 @@ struct HomeView: View {
     }
 }
 
-// MARK: - First View
+// MARK: - Home Content View
 struct HomeContentView: View {
-    @State private var selectedCategory = 0 // 0=groceries, 1=gas, 2=bills, 3=coffee
+    @StateObject private var viewModel = HomeViewModel() // ← CORRECCIÓN: usar @StateObject
+    @State private var selectedCategory = 0
     
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                Text("Welcome John Doe!")
+                // Welcome message con nombre real de Firebase
+                Text("Welcome \(userName)!")
                     .font(.system(size: 30, weight: .bold))
                     .padding(.top, 10)
-                    .offset(y: 32)  // Mueve solo el texto hacia abajo
-                
+                    .offset(y: 32)
                 
                 ZStack {
                     Image("trailHome2")
@@ -87,19 +90,25 @@ struct HomeContentView: View {
                         .frame(width: 380, height: 380)
                     
                     VStack(spacing: 5) {
-                        Text("$1572.33")
-                            .font(.system(size: 48, weight: .bold))
-                            .foregroundColor(.black)
-                        
-                        Text("Balance")
-                            .font(.title3)
-                            .foregroundColor(.black)
+                        // ← CORRECCIÓN: usar viewModel (instancia) no HomeViewModel (clase)
+                        if viewModel.isLoading {
+                            ProgressView()
+                                .tint(.black)
+                        } else {
+                            Text("$\(viewModel.balance, specifier: "%.2f")")
+                                .font(.system(size: 48, weight: .bold))
+                                .foregroundColor(.black)
+                            
+                            Text("Balance")
+                                .font(.title3)
+                                .foregroundColor(.black)
+                        }
                     }
                 }
                 .padding(.top, -40)
                 
                 Rectangle()
-                    .fill(Color.darkBlue)
+                    .fill(Color.blue)
                     .frame(height: 3)
                     .frame(width: 340)
                     .padding(.top, -35)
@@ -108,8 +117,8 @@ struct HomeContentView: View {
                     .font(.system(size: 27, weight: .semibold))
                     .padding(.bottom, 15)
                 
-                // Category selector (long slide toggle)
-                HStack{
+                // Category selector
+                HStack {
                     HStack(spacing: 0) {
                         CategoryButton(icon: "cart.fill", isSelected: selectedCategory == 0) {
                             withAnimation { selectedCategory = 0 }
@@ -129,41 +138,56 @@ struct HomeContentView: View {
                             .fill(Color.blue.opacity(0.3))
                             .frame(height: 50)
                     )
-                    
                     .padding(.horizontal, 35)
                     .padding(.bottom, 20)
                     
                     // Plus button
-                    
-                    HStack {
-                        //Spacer()
-                        
-                        Button(action: {
-                            // Add action
-                        }) {
-                            Image(systemName: "plus.circle.fill")
-                                .font(.system(size: 50))
-                                .foregroundColor(.red)
-                        }
-                        .padding(.trailing, 40)
+                    Button(action: {
+                        // TODO: Add new purchase
+                    }) {
+                        Image(systemName: "plus.circle.fill")
+                            .font(.system(size: 50))
+                            .foregroundColor(.red)
                     }
+                    .padding(.trailing, 40)
                     .padding(.bottom, 20)
                 }
                 
-                // Spending amounts grid
+                // Spending amounts grid - CON DATOS REALES
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
-                    SpendingCard(icon: "cart.fill", amount: "$704.12")
-                    SpendingCard(icon: "creditcard.fill", amount: "$1200.00")
-                    SpendingCard(icon: "car.fill", amount: "$340.33")
-                    SpendingCard(icon: "cup.and.saucer.fill", amount: "$272.02")
+                    SpendingCard(
+                        icon: "cart.fill",
+                        amount: "$\(viewModel.getSpending(for: .groceries), specifier: "%.2f")"
+                    )
+                    SpendingCard(
+                        icon: "creditcard.fill",
+                        amount: "$\(viewModel.getSpending(for: .bills), specifier: "%.2f")"
+                    )
+                    SpendingCard(
+                        icon: "car.fill",
+                        amount: "$\(viewModel.getSpending(for: .gas), specifier: "%.2f")"
+                    )
+                    SpendingCard(
+                        icon: "cup.and.saucer.fill",
+                        amount: "$\(viewModel.getSpending(for: .dining), specifier: "%.2f")"
+                    )
                 }
                 .padding(.horizontal, 30)
                 .padding(.bottom, 20)
                 
+                // Error message
+                if let error = viewModel.errorMessage {
+                    Text(error)
+                        .foregroundColor(.red)
+                        .font(.caption)
+                        .padding()
+                        .background(Color.red.opacity(0.1))
+                        .cornerRadius(10)
+                        .padding(.horizontal)
+                }
+                
                 // Insights button
-                Button(action: {
-                    // Navigate to insights
-                }) {
+                NavigationLink(destination: PieScreen()) {
                     Text("Insights")
                         .font(.title3)
                         .fontWeight(.bold)
@@ -175,9 +199,24 @@ struct HomeContentView: View {
                 .padding(.bottom, 20)
             }
         }
+        .task {
+            // ← Carga los datos cuando aparece la vista
+            await viewModel.loadData()
+        }
+        .refreshable {
+            // ← Pull to refresh
+            await viewModel.loadData()
+        }
+    }
+    
+    // Obtener nombre del usuario de Firebase
+    private var userName: String {
+        if let user = Auth.auth().currentUser {
+            return user.displayName ?? user.email?.components(separatedBy: "@").first?.capitalized ?? "User"
+        }
+        return "User"
     }
 }
-
 
 // MARK: - Category Button
 struct CategoryButton: View {
@@ -221,5 +260,7 @@ struct SpendingCard: View {
 }
 
 #Preview {
-    HomeView()
+    NavigationStack {
+        HomeView()
+    }
 }
