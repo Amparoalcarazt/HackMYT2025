@@ -1,4 +1,3 @@
-
 import SwiftUI
 import FirebaseAuth
 
@@ -7,7 +6,7 @@ struct HomeView: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            // Custom toggle style for Home/Stats
+            // Toggle Home/Stats
             HStack(spacing: 0) {
                 Button(action: {
                     withAnimation(.spring()) {
@@ -46,24 +45,12 @@ struct HomeView: View {
             .padding(.vertical, 15)
             
             if selectedView == 0 {
-                HomeView()
-                    .transition(
-                        .asymmetric(
-                            insertion: .move(edge: .leading).combined(with: .opacity),
-                            removal: .move(edge: .leading).combined(with: .opacity)
-                        )
-                    )
+                HomeContentView()
+                    .transition(.slide)
             } else {
                 PieScreen()
-                    .transition(
-                        .asymmetric(
-                            
-                            insertion: .move(edge: .trailing).combined(with: .opacity),
-                            removal: .move(edge: .trailing).combined(with: .opacity)
-                        )
-                    )
+                    .transition(.slide)
             }
-            
         }
         .animation(.easeInOut, value: selectedView)
     }
@@ -71,13 +58,13 @@ struct HomeView: View {
 
 // MARK: - Home Content View
 struct HomeContentView: View {
-    @StateObject private var viewModel = HomeViewModel() // ← CORRECCIÓN: usar @StateObject
+    @StateObject private var viewModel = HomeViewModel()
     @State private var selectedCategory = 0
     
     var body: some View {
         ScrollView {
             VStack(spacing: 0) {
-                // Welcome message con nombre real de Firebase
+                // Welcome message
                 Text("Welcome \(userName)!")
                     .font(.system(size: 30, weight: .bold))
                     .padding(.top, 10)
@@ -90,12 +77,11 @@ struct HomeContentView: View {
                         .frame(width: 380, height: 380)
                     
                     VStack(spacing: 5) {
-                        // ← CORRECCIÓN: usar viewModel (instancia) no HomeViewModel (clase)
                         if viewModel.isLoading {
                             ProgressView()
                                 .tint(.black)
                         } else {
-                            Text("$\(viewModel.balance, specifier: "%.2f")")
+                            Text(String(format: "$%.2f", viewModel.balance))
                                 .font(.system(size: 48, weight: .bold))
                                 .foregroundColor(.black)
                             
@@ -153,23 +139,23 @@ struct HomeContentView: View {
                     .padding(.bottom, 20)
                 }
                 
-                // Spending amounts grid - CON DATOS REALES
+                // Spending amounts - CORREGIDO ✅
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
                     SpendingCard(
                         icon: "cart.fill",
-                        amount: "$\(viewModel.getSpending(for: .groceries), default: "%.2f")"
+                        amount: String(format: "$%.2f", viewModel.getSpending(for: .groceries))
                     )
                     SpendingCard(
                         icon: "creditcard.fill",
-                        amount: "$\(viewModel.getSpending(for: .bills), default: "%.2f")"
+                        amount: String(format: "$%.2f", viewModel.getSpending(for: .bills))
                     )
                     SpendingCard(
                         icon: "car.fill",
-                        amount: "$\(viewModel.getSpending(for: .gas), default: "%.2f")"
+                        amount: String(format: "$%.2f", viewModel.getSpending(for: .gas))
                     )
                     SpendingCard(
                         icon: "cup.and.saucer.fill",
-                        amount: "$\(viewModel.getSpending(for: .dining), default: "%.2f")"
+                        amount: String(format: "$%.2f", viewModel.getSpending(for: .dining))
                     )
                 }
                 .padding(.horizontal, 30)
@@ -200,16 +186,13 @@ struct HomeContentView: View {
             }
         }
         .task {
-            // ← Carga los datos cuando aparece la vista
             await viewModel.loadData()
         }
         .refreshable {
-            // ← Pull to refresh
             await viewModel.loadData()
         }
     }
     
-    // Obtener nombre del usuario de Firebase
     private var userName: String {
         if let user = Auth.auth().currentUser {
             return user.displayName ?? user.email?.components(separatedBy: "@").first?.capitalized ?? "User"

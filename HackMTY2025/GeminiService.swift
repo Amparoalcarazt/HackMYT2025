@@ -6,74 +6,95 @@
 //
 
 import Foundation
-import GoogleGenerativeAI 
+import GoogleGenerativeAI
 
 class GeminiService {
     static let shared = GeminiService()
     
-    private let apiKey = "TU_GEMINI_API_KEY" // ← Obtén gratis en https://makersuite.google.com/app/apikey
+    private let apiKey = "AIzaSyD0uiIeSvINv9fqS2mg7G_F3RnK4alM528"
     private lazy var model: GenerativeModel = {
-        GenerativeModel(name: "gemini-1.5-flash", apiKey: apiKey)
+        GenerativeModel(name: "gemini-2.5-flash", apiKey: apiKey)
     }()
     
-    // MARK: - Categorize Purchase
-    func categorizePurchase(description: String, amount: Double) async throws -> SpendingCategory {
-        let prompt = """
-        Categoriza la siguiente compra en UNA de estas categorías: groceries, gas, bills, dining, other
+    // MARK: - Categorize Single Purchase
+    func categorizePurchase(merchantName: String, amount: Double, description: String? = nil) async throws -> SpendingCategory {
+        let purchaseInfo = description ?? merchantName
         
-        Compra: \(description)
+        let prompt = """
+        Categoriza la siguiente compra en UNA de estas categorías: Groceries, Gas, Bills, Dining, Other
+        
+        Compra: \(purchaseInfo)
+        Comercio: \(merchantName)
         Monto: $\(amount)
         
         Reglas:
-        - groceries: supermercados, tiendas de abarrotes, Oxxo, Walmart, etc.
-        - gas: gasolineras, combustible
-        - bills: servicios (luz, agua, internet, teléfono)
-        - dining: restaurantes, cafeterías, comida para llevar
-        - other: cualquier otra cosa
+        - Groceries: supermercados, tiendas de abarrotes, Oxxo, Walmart, Soriana, HEB, etc.
+        - Gas: gasolineras, combustible, Pemex, Shell, Mobil
+        - Bills: servicios (luz, agua, internet, teléfono), CFE, Telmex, Totalplay
+        - Dining: restaurantes, cafeterías, comida para llevar, Starbucks, McDonald's
+        - Other: cualquier otra cosa
         
-        Responde SOLO con una palabra: groceries, gas, bills, dining, o other
+        Responde SOLO con una palabra exacta: Groceries, Gas, Bills, Dining, o Other
         """
         
         let response = try await model.generateContent(prompt)
         
-        guard let text = response.text?.trimmingCharacters(in: .whitespacesAndNewlines).lowercased() else {
+        guard let text = response.text?.trimmingCharacters(in: .whitespacesAndNewlines) else {
             return .other
         }
         
-        // Parsear respuesta
-        switch text {
-        case let t where t.contains("groceries"):
+        // Parsear respuesta (case-insensitive)
+        let lowercased = text.lowercased()
+        
+        if lowercased.contains("groceries") {
             return .groceries
-        case let t where t.contains("gas"):
+        } else if lowercased.contains("gas") {
             return .gas
-        case let t where t.contains("bills"):
+        } else if lowercased.contains("bills") {
             return .bills
-        case let t where t.contains("dining"):
+        } else if lowercased.contains("dining") {
             return .dining
-        default:
+        } else {
             return .other
         }
     }
     
     // MARK: - Batch Categorization (más eficiente)
-    func categorizePurchases(_ purchases: [NessiePurchase]) async throws -> [String: SpendingCategory] {
-        let purchaseList = purchases.map { "\($0._id): \($0.description ?? "Unknown") - $\($0.amount)" }.joined(separator: "\n")
+    func categorizePurchases(_ purchases: [Purchase]) async throws -> [String: SpendingCategory] {
+        guard !purchases.isEmpty else {
+            return [:]
+        }
+        
+        // Crear lista de compras para el prompt
+        let purchaseList = purchases.map { purchase in
+            let id = purchase.id ?? UUID().uuidString
+            let desc = purchase.description ?? purchase.merchantName
+            return "\(id): \(desc) - $\(purchase.amount)"
+        }.joined(separator: "\n")
         
         let prompt = """
         Categoriza estas compras. Para cada ID, responde con el ID seguido de dos puntos y la categoría.
         
-        Categorías válidas: groceries, gas, bills, dining, other
+        Categorías válidas: Groceries, Gas, Bills, Dining, Other
+        
+        Reglas de categorización:
+        - Groceries: supermercados, tiendas, Oxxo, Walmart, Soriana, HEB
+        - Gas: gasolineras, combustible, Pemex, Shell
+        - Bills: servicios públicos, CFE, Telmex, agua, luz, internet
+        - Dining: restaurantes, cafés, Starbucks, comida rápida
+        - Other: todo lo demás
         
         Compras:
         \(purchaseList)
         
-        Formato de respuesta (una por línea):
+        Formato de respuesta (una por línea, sin texto adicional):
         ID: categoria
         ID: categoria
         
         Ejemplo:
-        abc123: groceries
-        def456: dining
+        abc123: Groceries
+        def456: Dining
+        ghi789: Gas
         """
         
         let response = try await model.generateContent(prompt)
@@ -86,39 +107,69 @@ class GeminiService {
     }
     
     // MARK: - Parse Batch Response
-    private func parseBatchResponse(_ text: String, purchases: [NessiePurchase]) -> [String: SpendingCategory] {
+    private func parseBatchResponse(_ text: String, purchases: [Purchase]) -> [String: SpendingCategory] {
         var results: [String: SpendingCategory] = [:]
         
         let lines = text.components(separatedBy: .newlines)
         
         for line in lines {
+            // Skip empty lines
+            guard !line.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else { continue }
+            
             let parts = line.components(separatedBy: ":")
             guard parts.count >= 2 else { continue }
             
             let id = parts[0].trimmingCharacters(in: .whitespacesAndNewlines)
             let categoryText = parts[1].trimmingCharacters(in: .whitespacesAndNewlines).lowercased()
             
+            // Parse category
             let category: SpendingCategory
-            switch categoryText {
-            case let t where t.contains("groceries"):
+            if categoryText.contains("groceries") {
                 category = .groceries
-            case let t where t.contains("gas"):
+            } else if categoryText.contains("gas") {
                 category = .gas
-            case let t where t.contains("bills"):
+            } else if categoryText.contains("bills") {
                 category = .bills
-            case let t where t.contains("dining"):
+            } else if categoryText.contains("dining") {
                 category = .dining
-            default:
+            } else {
                 category = .other
             }
             
             results[id] = category
         }
         
+        // Fallback: Si no se parseó alguna purchase, usar .other
+        for purchase in purchases {
+            if let purchaseId = purchase.id, results[purchaseId] == nil {
+                results[purchaseId] = .other
+            }
+        }
+        
         return results
+    }
+    
+    // MARK: - Chatbot (para futura implementación)
+    func chat(message: String, userContext: String = "") async throws -> String {
+        let prompt = """
+        Eres "Hormiguita", un asistente financiero amigable y útil.
+        Ayudas a los usuarios a entender sus gastos y dar consejos financieros inteligentes.
+        
+        Contexto del usuario:
+        \(userContext)
+        
+        Usuario pregunta: \(message)
+        
+        Responde de manera amigable, clara y útil. Si das consejos financieros, sé práctico y realista.
+        Usa emojis ocasionalmente 🐜 para ser más amigable.
+        """
+        
+        let response = try await model.generateContent(prompt)
+        return response.text ?? "Lo siento, no pude procesar tu mensaje. ¿Puedes intentar de nuevo?"
     }
 }
 
 enum GeminiError: Error {
     case invalidResponse
+    case emptyPurchaseList
 }

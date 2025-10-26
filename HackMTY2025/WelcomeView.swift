@@ -15,7 +15,7 @@ struct WelcomeView: View {
     @State private var showError = false  // para backend
     @State private var errorMessage = ""  // para backend
     @State private var isLoading = false  // para backend
-    @State private var isLoggedIn = false  // para backend
+    @State private var isLoggedIn = false // para backend
     
     var body: some View {
         NavigationStack {
