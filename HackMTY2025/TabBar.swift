@@ -14,9 +14,8 @@ struct TabBar: View {
     var body: some View {
         TabView {
             NavigationStack {
-                TDashboardView()
-                    .navigationTitle("Dashboard")
-                
+                HomeView()
+                    
             }
             .tabItem { Label("Dashboard", systemImage: "house.fill") }
             
@@ -24,20 +23,20 @@ struct TabBar: View {
                 RemindersList()
                     .navigationTitle("Reminders")
             }
-            .tabItem { Label("Reminders", systemImage: "map.fill") }
+            .tabItem { Label("Reminders", systemImage: "bell.fill") }
             
             NavigationStack {
                 TDashboardView()
-                    .navigationTitle("Lotes")
+                    .navigationTitle("ChatBot")
             }
-            .tabItem { Label("Lotes", systemImage: "mappin") }
+            .tabItem { Label("ChatBot", systemImage: "bubble.left.fill") }
             
             // configurations
             NavigationStack {
-                TPerfilView()
-                    .navigationTitle("Perfil")
+                SettingsView()
+                    .navigationTitle("Settings")
             }
-            .tabItem { Label("Perfil", systemImage: "person") }
+            .tabItem { Label("Settings", systemImage: "gearshape.fill") }
         }
         .tint(coolRed)
     }
@@ -56,12 +55,6 @@ struct TFincasView: View {
     }
 }
 
-struct TPerfilView: View {
-    @State private var searchText = ""
-    var body: some View {
-        Text("Perfil")
-    }
-}
 #Preview {
     TabBar()
         .modelContainer(for: Reminder.self, inMemory: true)

@@ -24,9 +24,6 @@ struct RemindersList: View {
             }
         }
         .padding()
-        
-        
-        
         .safeAreaInset(edge: .bottom) {
             VStack(alignment: .center, spacing: 10) {
                 Text("New Reminder")
@@ -41,6 +38,7 @@ struct RemindersList: View {
                     let newReminder = Reminder(amount: newAmount, start: Date.now, end: newDate)
                     context.insert(newReminder)
                     newDate = .now
+                    newAmount = 0
                 }
                 .bold()
                 
