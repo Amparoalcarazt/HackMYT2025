@@ -25,15 +25,15 @@ struct PieScreen: View {
     
     // Array con los nombres de tus imágenes
     let pieImages = [
-        "Group_22",  // Pay completo
-        "Group_26",  // Pocas hormiguitas
-        "PIE_2",
-        "Group_23",
-        "PIE_4",
-        "PIE_5",
-        "PIE_6",
-        "PIE_7",
-        "Group_24"   // Pay casi vacío
+        "1whole",  // Pay completo
+        "1slice",  // Pocas hormiguitas
+        "2slice",
+        "3slice",
+        "4slice",
+        "5slice",
+        "6slice",
+        "7slice",
+        "gone"   // Pay casi vacío
     ]
     
     var body: some View {
