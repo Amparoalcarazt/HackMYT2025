@@ -17,6 +17,10 @@ struct PieScreen: View {
     
     @State private var selectedSort: SortOption = .price
     @State private var currentPieIndex = 0
+    @State private var showBudgetInfo = false
+    @State private var showBudgetEditor = false
+    @State private var monthlyBudget: Double = 500.0
+    @State private var budgetInput: String = "500"
     
     enum SortOption: String, CaseIterable {
         case latest = "Latest"
@@ -42,58 +46,148 @@ struct PieScreen: View {
                 .ignoresSafeArea()
             ScrollView(showsIndicators: false) {
                 VStack(spacing: 20) {
-                    // Header con toggle
+                    // Header con solo el botón de menú
                     HStack {
                         Spacer()
                         
-                        Toggle("", isOn: .constant(true))
-                            .labelsHidden()
-                            .tint(Color(red: 0.2, green: 0.4, blue: 0.5))
-                        
-                        Button(action: {}) {
-                            Image(systemName: "ellipsis")
-                                .foregroundColor(.black)
-                                .rotationEffect(.degrees(90))
+                        Button(action: { showBudgetInfo.toggle() }) {
+                            Image(systemName: "info.circle")
+                                .foregroundColor(Color(red: 0.2, green: 0.4, blue: 0.5))
+                                .font(.title3)
                         }
                     }
                     .padding(.horizontal)
                     .padding(.top, 10)
                     
-                    // Título
-                    Text("Microspending")
-                        .font(.title2)
-                        .fontWeight(.semibold)
-                    
-                    // Gráfica de Pay ANIMADA
-                    AnimatedPieView(
-                        pieImages: pieImages,
-                        currentIndex: $currentPieIndex,
-                        totalAmount: totalSpending
-                    )
-                    .frame(width: 320, height: 320)
-                    .padding()
+                    // Sección del Pay con contexto
+                    VStack(spacing: 16) {
+                        // Título descriptivo
+                        VStack(spacing: 4) {
+                            Text("Your Microspending")
+                                .font(.system(size: 16, weight: .medium))
+                                .foregroundColor(.gray)
+                            
+                            // Contador animado del total
+                            Text("$\(totalSpending, specifier: "%.2f")")
+                                .font(.system(size: 48, weight: .bold))
+                                .foregroundColor(spendingColor)
+                                .contentTransition(.numericText())
+                        }
+                        
+                        // Gráfica de Pay ANIMADA
+                        AnimatedPieView(
+                            pieImages: pieImages,
+                            currentIndex: $currentPieIndex,
+                            totalAmount: totalSpending
+                        )
+                        .frame(width: 280, height: 280)
+                        
+                        // Barra de progreso del presupuesto
+                        VStack(spacing: 8) {
+                            HStack {
+                                Text("Microspending Limit")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                                Spacer()
+                                Button(action: {
+                                    showBudgetEditor = true
+                                }) {
+                                    HStack(spacing: 4) {
+                                        Text("\(Int(budgetPercentage))%")
+                                            .font(.caption)
+                                            .fontWeight(.semibold)
+                                        Image(systemName: "pencil.circle.fill")
+                                            .font(.caption)
+                                    }
+                                    .foregroundColor(spendingColor)
+                                }
+                            }
+                            
+                            GeometryReader { geometry in
+                                ZStack(alignment: .leading) {
+                                    // Fondo
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(Color.gray.opacity(0.2))
+                                        .frame(height: 12)
+                                    
+                                    // Progreso
+                                    RoundedRectangle(cornerRadius: 8)
+                                        .fill(
+                                            LinearGradient(
+                                                colors: budgetGradientColors,
+                                                startPoint: .leading,
+                                                endPoint: .trailing
+                                            )
+                                        )
+                                        .frame(width: min(geometry.size.width * CGFloat(budgetPercentage / 100), geometry.size.width), height: 12)
+                                        .animation(.spring(response: 0.6), value: budgetPercentage)
+                                }
+                            }
+                            .frame(height: 12)
+                            
+                            HStack {
+                                Text("$0")
+                                    .font(.caption2)
+                                    .foregroundColor(.gray)
+                                Spacer()
+                                Text("$\(monthlyBudget, specifier: "%.0f")")
+                                    .font(.caption2)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        .padding(.horizontal, 40)
+                        
+                        // Estado del presupuesto
+                        if budgetPercentage >= 80 {
+                            HStack(spacing: 8) {
+                                Image(systemName: budgetPercentage >= 100 ? "exclamationmark.triangle.fill" : "exclamationmark.circle.fill")
+                                Text(budgetPercentage >= 100 ? "Budget exceeded!" : "Getting close to budget limit")
+                                    .font(.subheadline)
+                                    .fontWeight(.medium)
+                            }
+                            .foregroundColor(spendingColor)
+                            .padding(.horizontal)
+                            .padding(.vertical, 8)
+                            .background(spendingColor.opacity(0.1))
+                            .cornerRadius(12)
+                        }
+                    }
+                    .padding(.bottom, 16)
                     
                     // Línea divisoria
                     Divider()
                         .padding(.horizontal)
                     
-                    // Segmented control
+                    // Segmented control con mejor diseño
                     HStack(spacing: 0) {
-                        Button(action: { selectedSort = .latest }) {
-                            Text("Latest")
-                                .fontWeight(selectedSort == .latest ? .semibold : .regular)
-                                .foregroundColor(.white)
-                                .frame(maxWidth: .infinity)
-                                .padding()
-                                .background(selectedSort == .latest ?
-                                            Color(red: 0.4, green: 0.7, blue: 0.8) :
-                                                Color(red: 0.3, green: 0.6, blue: 0.7))
+                        Button(action: {
+                            withAnimation(.spring(response: 0.3)) {
+                                selectedSort = .latest
+                            }
+                        }) {
+                            HStack(spacing: 6) {
+                                Image(systemName: "clock.fill")
+                                    .font(.system(size: 14))
+                                Text("Latest")
+                            }
+                            .fontWeight(selectedSort == .latest ? .semibold : .regular)
+                            .foregroundColor(.white)
+                            .frame(maxWidth: .infinity)
+                            .padding()
+                            .background(selectedSort == .latest ?
+                                        Color(red: 0.4, green: 0.7, blue: 0.8) :
+                                            Color(red: 0.3, green: 0.6, blue: 0.7))
                         }
                         
-                        Button(action: { selectedSort = .price }) {
-                            HStack {
-                                Text("Price")
+                        Button(action: {
+                            withAnimation(.spring(response: 0.3)) {
+                                selectedSort = .price
+                            }
+                        }) {
+                            HStack(spacing: 6) {
                                 Image(systemName: "arrow.up")
+                                    .font(.system(size: 14))
+                                Text("Price")
                             }
                             .fontWeight(selectedSort == .price ? .semibold : .regular)
                             .foregroundColor(.white)
@@ -107,21 +201,206 @@ struct PieScreen: View {
                     .cornerRadius(25)
                     .padding(.horizontal, 30)
                     
-                    // Lista de gastos hormiga
-                    ScrollView {
-                        VStack(spacing: 12) {
-                            ForEach(sortedSpendings) { spending in
-                                AntSpendingCard(spending: spending)
-                            }
-                        }
-                        .padding(.horizontal)
+                    // Contador de transacciones
+                    HStack {
+                        Text("\(antSpendings.count) Transactions")
+                            .font(.subheadline)
+                            .fontWeight(.semibold)
+                            .foregroundColor(.gray)
+                        Spacer()
                     }
+                    .padding(.horizontal, 30)
+                    .padding(.top, 8)
+                    
+                    // Lista de gastos hormiga
+                    VStack(spacing: 12) {
+                        ForEach(sortedSpendings) { spending in
+                            AntSpendingCard(spending: spending)
+                                .transition(.scale.combined(with: .opacity))
+                        }
+                    }
+                    .padding(.horizontal)
+                    .animation(.spring(response: 0.4), value: selectedSort)
                     
                     Spacer()
                 }
             }
             .onAppear {
                 updatePieImage()
+            }
+            .onChange(of: totalSpending) { _, _ in
+                updatePieImage()
+            }
+            
+            // Budget Editor Sheet
+            if showBudgetEditor {
+                ZStack {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            withAnimation {
+                                showBudgetEditor = false
+                            }
+                        }
+                    
+                    VStack(spacing: 20) {
+                        HStack {
+                            Text("Set Your Limit")
+                                .font(.title2)
+                                .fontWeight(.bold)
+                            Spacer()
+                            Button(action: {
+                                withAnimation {
+                                    showBudgetEditor = false
+                                }
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.gray)
+                                    .font(.title2)
+                            }
+                        }
+                        
+                        Text("How much microspending are you willing to have per month?")
+                            .font(.subheadline)
+                            .foregroundColor(.gray)
+                            .multilineTextAlignment(.center)
+                        
+                        // Budget input
+                        VStack(spacing: 12) {
+                            HStack(spacing: 12) {
+                                Text("$")
+                                    .font(.system(size: 32, weight: .bold))
+                                    .foregroundColor(Color(red: 0.2, green: 0.4, blue: 0.5))
+                                
+                                TextField("500", text: $budgetInput)
+                                    .font(.system(size: 32, weight: .bold))
+                                    .keyboardType(.decimalPad)
+                                    .multilineTextAlignment(.leading)
+                                    .frame(maxWidth: .infinity)
+                            }
+                            .padding()
+                            .background(Color.gray.opacity(0.1))
+                            .cornerRadius(12)
+                            
+                            // Quick presets
+                            VStack(spacing: 8) {
+                                Text("Quick Presets")
+                                    .font(.caption)
+                                    .foregroundColor(.gray)
+                                
+                                HStack(spacing: 12) {
+                                    ForEach([200, 500, 1000, 1500], id: \.self) { amount in
+                                        Button(action: {
+                                            budgetInput = "\(amount)"
+                                        }) {
+                                            Text("$\(amount)")
+                                                .font(.subheadline)
+                                                .fontWeight(.medium)
+                                                .foregroundColor(budgetInput == "\(amount)" ? .white : Color(red: 0.2, green: 0.4, blue: 0.5))
+                                                .padding(.horizontal, 16)
+                                                .padding(.vertical, 8)
+                                                .background(budgetInput == "\(amount)" ? Color(red: 0.2, green: 0.4, blue: 0.5) : Color.gray.opacity(0.2))
+                                                .cornerRadius(20)
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                        
+                        // Save button
+                        Button(action: {
+                            if let newBudget = Double(budgetInput), newBudget > 0 {
+                                withAnimation {
+                                    monthlyBudget = newBudget
+                                    showBudgetEditor = false
+                                }
+                            }
+                        }) {
+                            Text("Save Limit")
+                                .font(.headline)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(
+                                    LinearGradient(
+                                        colors: [Color(red: 0.4, green: 0.7, blue: 0.8), Color(red: 0.2, green: 0.4, blue: 0.5)],
+                                        startPoint: .leading,
+                                        endPoint: .trailing
+                                    )
+                                )
+                                .cornerRadius(12)
+                        }
+                    }
+                    .padding(24)
+                    .background(Color.white)
+                    .cornerRadius(20)
+                    .shadow(radius: 20)
+                    .padding(.horizontal, 30)
+                }
+                .transition(.opacity)
+            }
+            
+            // Info overlay
+            if showBudgetInfo {
+                ZStack {
+                    Color.black.opacity(0.4)
+                        .ignoresSafeArea()
+                        .onTapGesture {
+                            withAnimation {
+                                showBudgetInfo = false
+                            }
+                        }
+                    
+                    VStack(spacing: 16) {
+                        HStack {
+                            Text("About the Pie Chart")
+                                .font(.headline)
+                            Spacer()
+                            Button(action: {
+                                withAnimation {
+                                    showBudgetInfo = false
+                                }
+                            }) {
+                                Image(systemName: "xmark.circle.fill")
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                        
+                        Divider()
+                        
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack(alignment: .top, spacing: 12) {
+                                Image(systemName: "ant.fill")
+                                    .foregroundColor(Color(red: 0.2, green: 0.4, blue: 0.5))
+                                Text("The ants represent your microspending habits eating away at your budget")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
+                            
+                            HStack(alignment: .top, spacing: 12) {
+                                Image(systemName: "chart.pie.fill")
+                                    .foregroundColor(Color(red: 0.4, green: 0.7, blue: 0.8))
+                                Text("As you spend more, the pie disappears - watch your budget!")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
+                            
+                            HStack(alignment: .top, spacing: 12) {
+                                Image(systemName: "target")
+                                    .foregroundColor(.orange)
+                                Text("Keep your spending under $\(monthlyBudget, specifier: "%.0f") to maintain a healthy budget")
+                                    .font(.subheadline)
+                                    .foregroundColor(.gray)
+                            }
+                        }
+                    }
+                    .padding()
+                    .background(Color.white)
+                    .cornerRadius(20)
+                    .shadow(radius: 20)
+                    .padding(.horizontal, 30)
+                }
+                .transition(.opacity)
             }
         }
     }
@@ -139,26 +418,50 @@ struct PieScreen: View {
         antSpendings.reduce(0) { $0 + $1.amount }
     }
     
+    var budgetPercentage: Double {
+        min((totalSpending / monthlyBudget) * 100, 100)
+    }
+    
+    var spendingColor: Color {
+        if budgetPercentage >= 100 {
+            return .red
+        } else if budgetPercentage >= 80 {
+            return .orange
+        } else {
+            return Color(red: 0.2, green: 0.4, blue: 0.5)
+        }
+    }
+    
+    var budgetGradientColors: [Color] {
+        if budgetPercentage >= 100 {
+            return [.red, .red.opacity(0.7)]
+        } else if budgetPercentage >= 80 {
+            return [.orange, .yellow]
+        } else {
+            return [Color(red: 0.4, green: 0.7, blue: 0.8), Color(red: 0.2, green: 0.4, blue: 0.5)]
+        }
+    }
+    
     // Actualizar imagen del pay según el gasto total
     func updatePieImage() {
-        let total = totalSpending
+        let percentage = budgetPercentage
         
-        // Calcular qué imagen mostrar según el total
-        if total < 50 {
+        // Calcular qué imagen mostrar según el porcentaje del presupuesto
+        if percentage < 12.5 {
             currentPieIndex = 0  // Pay completo
-        } else if total < 100 {
+        } else if percentage < 25 {
             currentPieIndex = 1
-        } else if total < 150 {
+        } else if percentage < 37.5 {
             currentPieIndex = 2
-        } else if total < 200 {
+        } else if percentage < 50 {
             currentPieIndex = 3
-        } else if total < 250 {
+        } else if percentage < 62.5 {
             currentPieIndex = 4
-        } else if total < 300 {
+        } else if percentage < 75 {
             currentPieIndex = 5
-        } else if total < 350 {
+        } else if percentage < 87.5 {
             currentPieIndex = 6
-        } else if total < 400 {
+        } else if percentage < 100 {
             currentPieIndex = 7
         } else {
             currentPieIndex = 8  // Pay casi vacío
@@ -172,25 +475,44 @@ struct AnimatedPieView: View {
     @Binding var currentIndex: Int
     let totalAmount: Double
     
-    @State private var isAnimating = false
+    @State private var scale: CGFloat = 1.0
+    @State private var timer: Timer?
     
     var body: some View {
         ZStack {
+            // Círculo de fondo con sombra
+            Circle()
+                .fill(Color.gray.opacity(0.1))
+                .shadow(color: .gray.opacity(0.3), radius: 20, x: 0, y: 10)
+            
             // Imagen del pay
             Image(pieImages[currentIndex])
                 .resizable()
                 .scaledToFit()
-                .transition(.opacity)
-                .animation(.easeInOut(duration: 0.5), value: currentIndex)
+                .scaleEffect(scale)
+                .transition(.scale.combined(with: .opacity))
+                .animation(.spring(response: 0.6, dampingFraction: 0.7), value: currentIndex)
+        }
+        .onTapGesture {
+            withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                scale = 0.95
+            }
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.1) {
+                withAnimation(.spring(response: 0.3, dampingFraction: 0.6)) {
+                    scale = 1.0
+                }
+            }
         }
         .onAppear {
-            // Animación automática opcional (cambia cada 3 segundos)
             startAutoAnimation()
+        }
+        .onDisappear {
+            timer?.invalidate()
         }
     }
     
     func startAutoAnimation() {
-        Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { timer in
+        timer = Timer.scheduledTimer(withTimeInterval: 3.0, repeats: true) { _ in
             withAnimation {
                 // Ciclar a través de las imágenes
                 if currentIndex < pieImages.count - 1 {
@@ -226,7 +548,7 @@ struct AntSpendingCard: View {
                     .fontWeight(.semibold)
                     .foregroundColor(.black)
                 
-                Text("Date: 10.17.2025")
+                Text(spending.date, style: .date)
                     .font(.caption)
                     .foregroundColor(.gray)
             }

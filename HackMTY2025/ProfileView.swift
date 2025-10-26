@@ -10,119 +10,143 @@ import FirebaseAuth
 import PhotosUI
 
 struct ProfileView: View {
-    @State private var userName = "Loading..."
-    @State private var userEmail = ""
+    @State private var userName = "Name"
+    @State private var userEmail = "name@mail.com"
     @State private var profileImage: UIImage?
     @State private var showEditSheet = false
     @State private var showImagePicker = false
     @State private var selectedItem: PhotosPickerItem?
     
     var body: some View {
-        NavigationStack {
-            VStack(spacing: 0) {
-                // header azul con foto de perfil
+            NavigationStack {
                 ZStack {
-                    // fndo azul
-                    midBlue
-                        .frame(height: 280)
-                    
-                    VStack(spacing: 20) {
-                        // nombre
-                        Text(userName)
-                            .font(.system(size: 32, weight: .medium))
-                            .foregroundColor(.white)
-                        
-                        // foto de perfil
-                        ZStack {
-                            Circle()
-                                .fill(Color.white.opacity(0.9))
-                                .frame(width: 150, height: 150)
-                            
-                            if let image = profileImage {
-                                Image(uiImage: image)
-                                    .resizable()
-                                    .scaledToFill()
-                                    .frame(width: 150, height: 150)
-                                    .clipShape(Circle())
-                            } else {
-                                Image(systemName: "person.fill")
-                                    .resizable()
-                                    .scaledToFit()
-                                    .frame(width: 80, height: 80)
-                                    .foregroundColor(.gray)
-                            }
-                            
-                            // boton de camara para cambiar foto
-                            VStack {
-                                Spacer()
-                                HStack {
-                                    Spacer()
-                                    Button(action: {
-                                        showImagePicker = true
-                                    }) {
-                                        Image(systemName: "camera.fill")
-                                            .font(.system(size: 20))
-                                            .foregroundColor(.white)
-                                            .padding(8)
-                                            .background(midBlue)
-                                            .clipShape(Circle())
-                                    }
-                                }
-                            }
-                            .frame(width: 150, height: 150)
-                        }
-                    }
-                    
-                    // boton de editar
-                    VStack {
-                        HStack {
-                            Spacer()
-                            Button(action: {
-                                showEditSheet = true
-                            }) {
-                                Image(systemName: "pencil")
-                                    .font(.title2)
-                                    .foregroundColor(.white)
-                                    .padding()
-                            }
-                        }
+                    VStack(){
+                        LinearGradient(colors: [lightBlue, midBlue.opacity(0.8)],
+                                       startPoint: .topLeading,
+                                       endPoint: .bottomTrailing)
+                        .ignoresSafeArea()
+                        .frame(width: 400, height: 250)
                         Spacer()
                     }
-                }
-                
-                // email del usuario
-                Text(userEmail)
-                    .font(.subheadline)
-                    .foregroundColor(.gray)
-                    .padding(.top, 20)
-                
-                // espacio blanco debajo
-                Spacer()
-            }
-            .navigationTitle("Profile")
-            .navigationBarTitleDisplayMode(.inline)
-            .ignoresSafeArea(edges: .top)
-            .onAppear {
-                loadUserData()
-                loadProfileImage()
-            }
-            .sheet(isPresented: $showEditSheet) {
-                EditProfileSheet(userName: $userName)
-            }
-            .photosPicker(isPresented: $showImagePicker, selection: $selectedItem, matching: .images)
-            .onChange(of: selectedItem) { newItem in
-                Task {
-                    if let data = try? await newItem?.loadTransferable(type: Data.self),
-                       let image = UIImage(data: data) {
-                        profileImage = image
-                        saveProfileImage(image)
+                    
+                    ScrollView {
+                        VStack(spacing: 25) {
+                            // MARK: - Profile Picture + Name
+                            VStack(spacing: 16) {
+                                ZStack {
+                                    Circle()
+                                        .fill(Color.white.opacity(0.15))
+                                        .frame(width: 150, height: 150)
+                                        .shadow(color: .black.opacity(0.3), radius: 6, x: 0, y: 4)
+                                    
+                                    if let image = profileImage {
+                                        Image(uiImage: image)
+                                            .resizable()
+                                            .scaledToFill()
+                                            .frame(width: 150, height: 150)
+                                            .clipShape(Circle())
+                                    } else {
+                                        Image(systemName: "person.fill")
+                                            .resizable()
+                                            .scaledToFit()
+                                            .frame(width: 80, height: 80)
+                                            .foregroundColor(lightBlue)
+                                    }
+                                    
+                                    // camera button overlay
+                                    VStack {
+                                        Spacer()
+                                        HStack {
+                                            Spacer()
+                                            Button(action: {
+                                                showImagePicker = true
+                                            }) {
+                                                Image(systemName: "camera.fill")
+                                                    .font(.system(size: 20))
+                                                    .foregroundColor(.white)
+                                                    .padding(8)
+                                                    .background(.black)
+                                                    .clipShape(Circle())
+                                            }
+                                        }
+                                    }
+                                    .frame(width: 150, height: 150)
+                                }
+                                
+                                Text(userName)
+                                    .font(.system(size: 28, weight: .semibold))
+                                    .foregroundColor(.white)
+                            
+                            }
+                            .padding(.top, 40)
+                            
+                            // MARK: - Info Card
+                            VStack(alignment: .leading, spacing: 16) {
+                                HStack {
+                                    
+                                    Text("Account Details")
+                                        .bold()
+                                    Spacer()
+                                    Button("Edit") {
+                                        showEditSheet = true
+                                    }
+                                    .font(.subheadline)
+                                    .foregroundColor(.blue)
+                                }
+                                
+                                Divider().background(Color.gray.opacity(0.2))
+                                Text("\(userName)")
+                                Text("\(userEmail)")
+                                    .font(.subheadline)
+                                    .foregroundColor(.black)
+                            
+                            }
+                            .padding()
+                            .background(Color.white)
+                            .cornerRadius(16)
+                            .shadow(color: .black.opacity(0.1), radius: 6, x: 0, y: 4)
+                            .padding(.horizontal)
+                            
+                            // MARK: - Logout Button
+                            Button {
+                                try? Auth.auth().signOut()
+                                // Handle navigation after logout
+                            } label: {
+                                Text("Log Out")
+                                    .font(.headline)
+                                    .foregroundColor(.white)
+                                    .frame(maxWidth: .infinity)
+                                    .padding()
+                                    .background(Color.black.opacity(0.3))
+                                    .cornerRadius(12)
+                                    .padding(.horizontal, 40)
+                            }
+                            .padding(.bottom, 40)
+                        }
                     }
                 }
+                .navigationTitle("Profile")
+                .navigationBarTitleDisplayMode(.inline)
+                .onAppear {
+                    loadUserData()
+                    loadProfileImage()
+                }
+                .sheet(isPresented: $showEditSheet) {
+                    EditProfileSheet(userName: $userName)
+                }
+                .photosPicker(isPresented: $showImagePicker, selection: $selectedItem, matching: .images)
+                .onChange(of: selectedItem) {
+                    Task {
+                        if let data = try? await selectedItem?.loadTransferable(type: Data.self),
+                           let image = UIImage(data: data) {
+                            profileImage = image
+                            saveProfileImage(image)
+                        }
+                    }
+                }
+
             }
-        }
-    }
-    
-    // datos del usuario de Firebase
+        }    // datos del usuario de Firebase
     func loadUserData() {
         if let user = Auth.auth().currentUser {
             // obtener nombre (si fue configurado) o email
