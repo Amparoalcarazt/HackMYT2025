@@ -20,7 +20,6 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Section {
-                    // ← CAMBIAR ESTO: de SignUpView() a ProfileView()
                     NavigationLink(destination: ProfileView()) {
                         Label("Account settings", systemImage: "person.circle.fill")
                             .foregroundColor(midBlue)
@@ -34,7 +33,7 @@ struct SettingsView: View {
                         }
                     }
                     
-                    Picker("Select a currency", selection: $currency) {  // ← ARREGLÉ ESTO (era $language)
+                    Picker("Select a currency", selection: $currency) { 
                         ForEach(currencies, id: \.self) { currency in
                             Text(currency)
                         }
