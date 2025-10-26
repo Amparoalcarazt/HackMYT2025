@@ -30,6 +30,7 @@ struct WelcomeView: View {
                         .frame(height: 120)
                         .foregroundStyle(darkBlue)
                         .padding(30)
+                        .padding(.top, 40)
                     
                     Text("Welcome to CrumbTrail")
                     
@@ -86,6 +87,7 @@ struct WelcomeView: View {
                 }
                 .padding(.horizontal, 50)
             }
+            .scrollDismissesKeyboard(.interactively)
             // NAVEGACION CUANDO LOGIN EXITOSO
             .navigationDestination(isPresented: $isLoggedIn) {
                 ContentView()  // pantalla principal después del login -> home
