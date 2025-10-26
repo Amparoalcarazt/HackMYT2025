@@ -14,8 +14,8 @@ struct TabBar: View {
     var body: some View {
         TabView {
             NavigationStack {
-                TDashboardView()
-                    .navigationTitle("Dashboard")
+                HomeView()
+                    
             }
             .tabItem { Label("Dashboard", systemImage: "house.fill") }
             
