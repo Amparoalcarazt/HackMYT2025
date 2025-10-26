@@ -33,7 +33,7 @@ struct TabBar: View {
             
             // configurations
             NavigationStack {
-                TPerfilView()
+                SettingsView()
                     .navigationTitle("Settings")
             }
             .tabItem { Label("Settings", systemImage: "gearshape.fill") }
@@ -55,12 +55,6 @@ struct TFincasView: View {
     }
 }
 
-struct TPerfilView: View {
-    @State private var searchText = ""
-    var body: some View {
-        Text("Perfil")
-    }
-}
 #Preview {
     TabBar()
         .modelContainer(for: Reminder.self, inMemory: true)
