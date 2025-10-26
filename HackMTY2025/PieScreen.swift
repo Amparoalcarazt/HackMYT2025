@@ -40,88 +40,89 @@ struct PieScreen: View {
         ZStack {
             Color.white
                 .ignoresSafeArea()
-            
-            VStack(spacing: 20) {
-                // Header con toggle
-                HStack {
-                    Spacer()
-                    
-                    Toggle("", isOn: .constant(true))
-                        .labelsHidden()
-                        .tint(Color(red: 0.2, green: 0.4, blue: 0.5))
-                    
-                    Button(action: {}) {
-                        Image(systemName: "ellipsis")
-                            .foregroundColor(.black)
-                            .rotationEffect(.degrees(90))
+            ScrollView(showsIndicators: false) {
+                VStack(spacing: 20) {
+                    // Header con toggle
+                    HStack {
+                        Spacer()
+                        
+                        Toggle("", isOn: .constant(true))
+                            .labelsHidden()
+                            .tint(Color(red: 0.2, green: 0.4, blue: 0.5))
+                        
+                        Button(action: {}) {
+                            Image(systemName: "ellipsis")
+                                .foregroundColor(.black)
+                                .rotationEffect(.degrees(90))
+                        }
                     }
-                }
-                .padding(.horizontal)
-                .padding(.top, 10)
-                
-                // Título
-                Text("Microspending")
-                    .font(.title2)
-                    .fontWeight(.semibold)
-                
-                // Gráfica de Pay ANIMADA
-                AnimatedPieView(
-                    pieImages: pieImages,
-                    currentIndex: $currentPieIndex,
-                    totalAmount: totalSpending
-                )
-                .frame(width: 320, height: 320)
-                .padding()
-                
-                // Línea divisoria
-                Divider()
                     .padding(.horizontal)
-                
-                // Segmented control
-                HStack(spacing: 0) {
-                    Button(action: { selectedSort = .latest }) {
-                        Text("Latest")
-                            .fontWeight(selectedSort == .latest ? .semibold : .regular)
+                    .padding(.top, 10)
+                    
+                    // Título
+                    Text("Microspending")
+                        .font(.title2)
+                        .fontWeight(.semibold)
+                    
+                    // Gráfica de Pay ANIMADA
+                    AnimatedPieView(
+                        pieImages: pieImages,
+                        currentIndex: $currentPieIndex,
+                        totalAmount: totalSpending
+                    )
+                    .frame(width: 320, height: 320)
+                    .padding()
+                    
+                    // Línea divisoria
+                    Divider()
+                        .padding(.horizontal)
+                    
+                    // Segmented control
+                    HStack(spacing: 0) {
+                        Button(action: { selectedSort = .latest }) {
+                            Text("Latest")
+                                .fontWeight(selectedSort == .latest ? .semibold : .regular)
+                                .foregroundColor(.white)
+                                .frame(maxWidth: .infinity)
+                                .padding()
+                                .background(selectedSort == .latest ?
+                                            Color(red: 0.4, green: 0.7, blue: 0.8) :
+                                                Color(red: 0.3, green: 0.6, blue: 0.7))
+                        }
+                        
+                        Button(action: { selectedSort = .price }) {
+                            HStack {
+                                Text("Price")
+                                Image(systemName: "arrow.up")
+                            }
+                            .fontWeight(selectedSort == .price ? .semibold : .regular)
                             .foregroundColor(.white)
                             .frame(maxWidth: .infinity)
                             .padding()
-                            .background(selectedSort == .latest ?
-                                       Color(red: 0.4, green: 0.7, blue: 0.8) :
-                                       Color(red: 0.3, green: 0.6, blue: 0.7))
+                            .background(selectedSort == .price ?
+                                        Color(red: 0.2, green: 0.4, blue: 0.5) :
+                                            Color(red: 0.3, green: 0.6, blue: 0.7))
+                        }
+                    }
+                    .cornerRadius(25)
+                    .padding(.horizontal, 30)
+                    
+                    // Lista de gastos hormiga
+                    ScrollView {
+                        VStack(spacing: 12) {
+                            ForEach(sortedSpendings) { spending in
+                                AntSpendingCard(spending: spending)
+                            }
+                        }
+                        .padding(.horizontal)
                     }
                     
-                    Button(action: { selectedSort = .price }) {
-                        HStack {
-                            Text("Price")
-                            Image(systemName: "arrow.up")
-                        }
-                        .fontWeight(selectedSort == .price ? .semibold : .regular)
-                        .foregroundColor(.white)
-                        .frame(maxWidth: .infinity)
-                        .padding()
-                        .background(selectedSort == .price ?
-                                   Color(red: 0.2, green: 0.4, blue: 0.5) :
-                                   Color(red: 0.3, green: 0.6, blue: 0.7))
-                    }
+                    Spacer()
                 }
-                .cornerRadius(25)
-                .padding(.horizontal, 30)
-                
-                // Lista de gastos hormiga
-                ScrollView {
-                    VStack(spacing: 12) {
-                        ForEach(sortedSpendings) { spending in
-                            AntSpendingCard(spending: spending)
-                        }
-                    }
-                    .padding(.horizontal)
-                }
-                
-                Spacer()
             }
-        }
-        .onAppear {
-            updatePieImage()
+            .onAppear {
+                updatePieImage()
+            }
         }
     }
     
