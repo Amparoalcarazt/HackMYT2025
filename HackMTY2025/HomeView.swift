@@ -50,12 +50,22 @@ struct HomeView: View {
             .padding(.vertical, 15)
             
             if selectedView == 0 {
-                HomeContentView()
-                    .transition(.slide)
-            } else {
-                PieScreen()
-                    .transition(.slide)
-            }
+                    HomeContentView()
+                        .transition(
+                            .asymmetric(
+                                insertion: .move(edge: .trailing).combined(with: .opacity),
+                                removal: .move(edge: .leading).combined(with: .opacity)
+                            )
+                        )
+                } else {
+                    PieScreen()
+                        .transition(
+                            .asymmetric(
+                                insertion: .move(edge: .leading).combined(with: .opacity),
+                                removal: .move(edge: .trailing).combined(with: .opacity)
+                            )
+                        )
+                }
         }
         .animation(.easeInOut, value: selectedView)
     }
