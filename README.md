@@ -20,7 +20,7 @@ It enables users to **visualize their money flow** and offers **AI-driven guidan
 - **SwiftData** — Local data storage and management  
 - **Firebase** — Cloud database and user authentication  
 - **Figma** — UI/UX design and prototyping  
-- **Gemini API** — AI integration for financial insights  
+- **Gemini API** — AI integration for financial insights through a chat
 
 ---
 
