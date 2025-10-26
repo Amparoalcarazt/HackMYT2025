@@ -10,9 +10,9 @@ import SwiftUI
 struct PieScreen: View {
     // Datos de ejemplo
     @State private var antSpendings: [AntSpending] = [
-        AntSpending(merchantName: "Oxxo", amount: 45.50, date: Date(), frequency: 5, iconName: "cart.fill"),
-        AntSpending(merchantName: "Starbucks Tec", amount: 98.00, date: Date(), frequency: 4, iconName: "cup.and.saucer.fill"),
-        AntSpending(merchantName: "H&M", amount: 195.00, date: Date(), frequency: 3, iconName: "bag.fill")
+        AntSpending(merchantName: "7-Eleven", amount: 5.50, date: Date(), frequency: 5, iconName: "cart.fill"),
+        AntSpending(merchantName: "Starbucks", amount: 8.00, date: Date(), frequency: 4, iconName: "cup.and.saucer.fill"),
+        AntSpending(merchantName: "H&M", amount: 25.00, date: Date(), frequency: 3, iconName: "bag.fill")
     ]
     
     @State private var selectedSort: SortOption = .price
@@ -289,7 +289,7 @@ struct PieScreen: View {
                                     .foregroundColor(.gray)
                                 
                                 HStack(spacing: 12) {
-                                    ForEach([200, 500, 1000, 1500], id: \.self) { amount in
+                                    ForEach([30, 50, 100], id: \.self) { amount in
                                         Button(action: {
                                             budgetInput = "\(amount)"
                                         }) {
@@ -297,8 +297,8 @@ struct PieScreen: View {
                                                 .font(.subheadline)
                                                 .fontWeight(.medium)
                                                 .foregroundColor(budgetInput == "\(amount)" ? .white : Color(red: 0.2, green: 0.4, blue: 0.5))
-                                                .padding(.horizontal, 16)
-                                                .padding(.vertical, 8)
+                                                .padding(.horizontal, 20)
+                                                .padding(.vertical, 10)
                                                 .background(budgetInput == "\(amount)" ? Color(red: 0.2, green: 0.4, blue: 0.5) : Color.gray.opacity(0.2))
                                                 .cornerRadius(20)
                                         }
