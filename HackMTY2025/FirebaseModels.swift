@@ -8,16 +8,26 @@
 import Foundation
 import FirebaseFirestore
 
-// MARK: - User Financial Data
-struct UserFinancialData: Codable, Identifiable {
+// MARK: - User Profile Data
+struct UserProfile: Codable, Identifiable {
     @DocumentID var id: String?
     var userId: String
+    var firstName: String
+    var lastName: String
+    var email: String
     var balance: Double
     var lastUpdated: Date
+    
+    var fullName: String {
+        "\(firstName) \(lastName)"
+    }
     
     enum CodingKeys: String, CodingKey {
         case id
         case userId
+        case firstName
+        case lastName
+        case email
         case balance
         case lastUpdated
     }
@@ -29,7 +39,7 @@ struct Purchase: Codable, Identifiable {
     var userId: String
     var merchantName: String
     var amount: Double
-    var category: String // groceries, gas, bills, dining, other
+    var category: String
     var date: Date
     var description: String?
     
