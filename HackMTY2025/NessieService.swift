@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import Combine
 
 class NessieService: ObservableObject {
     static let shared = NessieService()

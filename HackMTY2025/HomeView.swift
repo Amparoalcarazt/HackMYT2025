@@ -46,7 +46,7 @@ struct HomeView: View {
             .padding(.vertical, 15)
             
             if selectedView == 0 {
-                HomeContentView()
+                HomeView()
                     .transition(
                         .asymmetric(
                             insertion: .move(edge: .leading).combined(with: .opacity),
@@ -157,19 +157,19 @@ struct HomeContentView: View {
                 LazyVGrid(columns: [GridItem(.flexible()), GridItem(.flexible())], spacing: 15) {
                     SpendingCard(
                         icon: "cart.fill",
-                        amount: "$\(viewModel.getSpending(for: .groceries), specifier: "%.2f")"
+                        amount: "$\(viewModel.getSpending(for: .groceries), default: "%.2f")"
                     )
                     SpendingCard(
                         icon: "creditcard.fill",
-                        amount: "$\(viewModel.getSpending(for: .bills), specifier: "%.2f")"
+                        amount: "$\(viewModel.getSpending(for: .bills), default: "%.2f")"
                     )
                     SpendingCard(
                         icon: "car.fill",
-                        amount: "$\(viewModel.getSpending(for: .gas), specifier: "%.2f")"
+                        amount: "$\(viewModel.getSpending(for: .gas), default: "%.2f")"
                     )
                     SpendingCard(
                         icon: "cup.and.saucer.fill",
-                        amount: "$\(viewModel.getSpending(for: .dining), specifier: "%.2f")"
+                        amount: "$\(viewModel.getSpending(for: .dining), default: "%.2f")"
                     )
                 }
                 .padding(.horizontal, 30)
