@@ -44,14 +44,26 @@ struct HomeView: View {
             )
             .padding(.horizontal, 80)
             .padding(.vertical, 15)
-
+            
             if selectedView == 0 {
                 HomeContentView()
-                    .transition(.slide)
+                    .transition(
+                        .asymmetric(
+                            insertion: .move(edge: .leading).combined(with: .opacity),
+                            removal: .move(edge: .leading).combined(with: .opacity)
+                        )
+                    )
             } else {
-                PieScreen() // ← Tu pantalla de Stats
-                    .transition(.slide)
+                PieScreen()
+                    .transition(
+                        .asymmetric(
+                            
+                            insertion: .move(edge: .trailing).combined(with: .opacity),
+                            removal: .move(edge: .trailing).combined(with: .opacity)
+                        )
+                    )
             }
+            
         }
         .animation(.easeInOut, value: selectedView)
     }
