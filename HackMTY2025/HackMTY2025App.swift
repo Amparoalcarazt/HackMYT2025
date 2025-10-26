@@ -8,6 +8,7 @@
 import SwiftUI
 import FirebaseCore
 import FirebaseFirestore
+import SwiftData
 
 @main
 struct HackMTY2025App: App {
@@ -25,6 +26,8 @@ struct HackMTY2025App: App {
     var body: some Scene {
         WindowGroup {
             WelcomeView()
+                .modelContainer(for: Reminder.self)
+
         }
     }
 }
