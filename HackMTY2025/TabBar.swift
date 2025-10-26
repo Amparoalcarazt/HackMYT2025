@@ -17,10 +17,10 @@ struct TabBar: View {
                 HomeView()
                     
             }
-            .tabItem { Label("Dashboard", systemImage: "house.fill") }
+            .tabItem { Label("Home", systemImage: "house.fill") }
             
             NavigationStack {
-                RemindersList()
+                RemindersView()
                     .navigationTitle("Reminders")
             }
             .tabItem { Label("Reminders", systemImage: "bell.fill") }
