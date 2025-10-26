@@ -164,6 +164,7 @@ struct WelcomeView: View {
                         HStack(spacing: 4) {
                             Text("Don't have an account?")
                                 .foregroundStyle(.gray)
+
                             Text("Sign up!")
                                 .foregroundStyle(midBlue)
                                 .fontWeight(.semibold)
@@ -177,6 +178,8 @@ struct WelcomeView: View {
             .navigationDestination(isPresented: $isLoggedIn) {
                 ContentView()
             }
+            
+           
         }
     }
     
