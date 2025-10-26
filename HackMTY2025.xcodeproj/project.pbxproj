@@ -6,6 +6,10 @@
 	objectVersion = 77;
 	objects = {
 
+/* Begin PBXBuildFile section */
+		BC347CB02EADF30C00BE15B0 /* GoogleGenerativeAI in Frameworks */ = {isa = PBXBuildFile; productRef = BC347CAF2EADF30C00BE15B0 /* GoogleGenerativeAI */; };
+/* End PBXBuildFile section */
+
 /* Begin PBXFileReference section */
 		BBEE7B852EAD3EE800AA6B8D /* HackMTY2025.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = HackMTY2025.app; sourceTree = BUILT_PRODUCTS_DIR; };
 /* End PBXFileReference section */
@@ -23,6 +27,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BC347CB02EADF30C00BE15B0 /* GoogleGenerativeAI in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -65,6 +70,7 @@
 			);
 			name = HackMTY2025;
 			packageProductDependencies = (
+				BC347CAF2EADF30C00BE15B0 /* GoogleGenerativeAI */,
 			);
 			productName = HackMTY2025;
 			productReference = BBEE7B852EAD3EE800AA6B8D /* HackMTY2025.app */;
@@ -94,6 +100,9 @@
 			);
 			mainGroup = BBEE7B7C2EAD3EE800AA6B8D;
 			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				BC347CAE2EADF30C00BE15B0 /* XCRemoteSwiftPackageReference "generative-ai-swift" */,
+			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = BBEE7B862EAD3EE800AA6B8D /* Products */;
 			projectDirPath = "";
@@ -332,6 +341,25 @@
 			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
+
+/* Begin XCRemoteSwiftPackageReference section */
+		BC347CAE2EADF30C00BE15B0 /* XCRemoteSwiftPackageReference "generative-ai-swift" */ = {
+			isa = XCRemoteSwiftPackageReference;
+			repositoryURL = "https://github.com/google-gemini/generative-ai-swift";
+			requirement = {
+				kind = upToNextMajorVersion;
+				minimumVersion = 0.5.6;
+			};
+		};
+/* End XCRemoteSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		BC347CAF2EADF30C00BE15B0 /* GoogleGenerativeAI */ = {
+			isa = XCSwiftPackageProductDependency;
+			package = BC347CAE2EADF30C00BE15B0 /* XCRemoteSwiftPackageReference "generative-ai-swift" */;
+			productName = GoogleGenerativeAI;
+		};
+/* End XCSwiftPackageProductDependency section */
 	};
 	rootObject = BBEE7B7D2EAD3EE800AA6B8D /* Project object */;
 }
