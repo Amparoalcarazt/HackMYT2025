@@ -52,7 +52,7 @@ class HomeViewModel: ObservableObject {
     
     // MARK: - Load Mock Data (fallback)
     private func loadMockData() {
-        print("📱 Using local mock data")
+        print("Using local mock data")
         
         userFullName = "John Pork"
         balance = 1572.33

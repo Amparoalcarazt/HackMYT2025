@@ -52,31 +52,67 @@ struct WelcomeView: View {
                                 )
                             )
                             .shadow(color: midBlue.opacity(0.3), radius: 8, x: 0, y: 4)
+                        
+                        Text("Follow the trail to better habits")
+                            .font(.system(size: 14, weight: .medium))
+                            .foregroundColor(darkBlue.opacity(0.6))
+                            .italic()
+                            .padding(.top, 4)
                     }
                     .padding(.vertical, 20)
                     
                     Spacer()
                     
-                    // Campos de entrada
+                    // Input fields with icons
                     VStack(alignment: .center, spacing: 16) {
-                        TextField("Email", text: $email)
-                            .textFieldStyle(.roundedBorder)
-                            .autocapitalization(.none)
-                            .keyboardType(.emailAddress)
+                        // Email field
+                        HStack(spacing: 12) {
+                            Image(systemName: "envelope.fill")
+                                .foregroundColor(midBlue)
+                                .frame(width: 20)
+                            
+                            TextField("Email", text: $email)
+                                .autocapitalization(.none)
+                                .keyboardType(.emailAddress)
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.9))
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(midBlue.opacity(0.3), lineWidth: 1)
+                        )
                         
-                        SecureField("Password", text: $password)
-                            .textFieldStyle(.roundedBorder)
+                        // Password field
+                        HStack(spacing: 12) {
+                            Image(systemName: "lock.fill")
+                                .foregroundColor(midBlue)
+                                .frame(width: 20)
+                            
+                            SecureField("Password", text: $password)
+                        }
+                        .padding()
+                        .background(Color.white.opacity(0.9))
+                        .cornerRadius(12)
+                        .overlay(
+                            RoundedRectangle(cornerRadius: 12)
+                                .stroke(midBlue.opacity(0.3), lineWidth: 1)
+                        )
                     }
                     .padding(.horizontal, 40)
                     
-                    // Mensaje de error
+                    // Error message
                     if showError {
-                        Text(errorMessage)
-                            .foregroundColor(.red)
-                            .font(.caption)
-                            .multilineTextAlignment(.center)
-                            .padding(.horizontal, 40)
-                            .padding(.top, 8)
+                        HStack(spacing: 8) {
+                            Image(systemName: "exclamationmark.triangle.fill")
+                                .font(.system(size: 12))
+                            Text(errorMessage)
+                                .font(.caption)
+                        }
+                        .foregroundColor(.red)
+                        .multilineTextAlignment(.center)
+                        .padding(.horizontal, 40)
+                        .padding(.top, 8)
                     }
                     
                     // Forgot password
@@ -99,11 +135,15 @@ struct WelcomeView: View {
                                 .frame(maxWidth: .infinity)
                                 .frame(height: 50)
                         } else {
-                            Text("Sign in")
-                                .font(.system(size: 18, weight: .semibold))
-                                .foregroundStyle(.white)
-                                .frame(maxWidth: .infinity)
-                                .frame(height: 50)
+                            HStack(spacing: 8) {
+                                Text("Sign in")
+                                    .font(.system(size: 18, weight: .semibold))
+                                Image(systemName: "arrow.right.circle.fill")
+                                    .font(.system(size: 18))
+                            }
+                            .foregroundStyle(.white)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 50)
                         }
                     }
                     .background(
@@ -121,12 +161,13 @@ struct WelcomeView: View {
                     
                     // Sign up link
                     NavigationLink(destination: SignUpView()) {
-                        Text("Don't have an account? ")
-                            .foregroundStyle(.gray)
-                            +
-                        Text("Sign up!")
-                            .foregroundStyle(midBlue)
-                            .fontWeight(.semibold)
+                        HStack(spacing: 4) {
+                            Text("Don't have an account?")
+                                .foregroundStyle(.gray)
+                            Text("Sign up!")
+                                .foregroundStyle(midBlue)
+                                .fontWeight(.semibold)
+                        }
                     }
                     .padding(.top, 16)
                     
