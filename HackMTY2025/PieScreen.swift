@@ -272,7 +272,7 @@ struct PieScreen: View {
                                     .font(.system(size: 32, weight: .bold))
                                     .foregroundColor(Color(red: 0.2, green: 0.4, blue: 0.5))
                                 
-                                TextField("500", text: $budgetInput)
+                                TextField("200", text: $budgetInput)
                                     .font(.system(size: 32, weight: .bold))
                                     .keyboardType(.decimalPad)
                                     .multilineTextAlignment(.leading)
