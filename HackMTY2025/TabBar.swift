@@ -26,8 +26,8 @@ struct TabBar: View {
             .tabItem { Label("Reminders", systemImage: "bell.fill") }
             
             NavigationStack {
-                TDashboardView()
-                    .navigationTitle("ChatBot")
+                ChatBotView()
+                    
             }
             .tabItem { Label("ChatBot", systemImage: "bubble.left.fill") }
             
