@@ -5,7 +5,6 @@
 //  Created by Amparo Alcaraz Tonella on 25/10/25.
 //
 
-
 import Foundation
 import SwiftData
 
@@ -15,7 +14,6 @@ class Reminder {
     var amount: Int
     var start: Date
     var end: Date
-    
     
     init(id: UUID = UUID(), amount: Int, start: Date, end: Date) {
         self.id = id

@@ -131,7 +131,7 @@ struct SignUpView: View {
                 return
             }
             
-            print("✅ User created: \(result?.user.email ?? "")")
+            print("User created: \(result?.user.email ?? "")")
             signUpSuccess = true
         }
     }
