@@ -161,10 +161,10 @@ struct WelcomeView: View {
                     
                     // Sign up link
                     NavigationLink(destination: SignUpView()) {
+
                         HStack(spacing: 4) {
                             Text("Don't have an account?")
                                 .foregroundStyle(.gray)
-
                             Text("Sign up!")
                                 .foregroundStyle(midBlue)
                                 .fontWeight(.semibold)
