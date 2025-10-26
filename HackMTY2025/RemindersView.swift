@@ -7,31 +7,12 @@
 
 import SwiftUI
 import SwiftData
-import TipKit
-
-// TipKit!! 
-struct CreateReminderTip: Tip {
-    var title: Text {
-        Text("Set Your First Goal")
-    }
-    
-    var message: Text? {
-        Text("Create a savings reminder to track your progress")
-    }
-    
-    var image: Image? {
-        Image(systemName: "target")
-    }
-}
 
 struct RemindersView: View {
     @Query(sort: \Reminder.start) private var reminders: [Reminder]
     @Environment(\.modelContext) private var context
     @State private var newAmount = 0
     @State private var newDate = Date.now
-    
-    // TipKit initializze the tip
-    private let createReminderTip = CreateReminderTip()
     
     var body: some View {
         ZStack {
@@ -50,11 +31,6 @@ struct RemindersView: View {
                     Text("Create your first savings goal below")
                         .font(.subheadline)
                         .foregroundStyle(.gray.opacity(0.8))
-                    
-                    // TipKit showingg tip only when empty
-                    TipView(createReminderTip)
-                        .padding(.horizontal, 40)
-                        .padding(.top, 10)
                 }
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
                 .background(
@@ -93,8 +69,6 @@ struct RemindersView: View {
                     newDate = .now
                     newAmount = 0
                     
-                    // Part of tipkit too, invalidate tip after first reminder
-                    createReminderTip.invalidate(reason: .actionPerformed)
                 }
                 .bold()
                 .buttonStyle(.borderedProminent)
@@ -103,10 +77,6 @@ struct RemindersView: View {
             .padding(.horizontal, 30)
             .background(.bar)
             .background(midBlue)
-        }
-        .onAppear {
-            // TipKit: Configure tips (call once in app lifecycle, typically in App file)
-            // try? Tips.configure([.displayFrequency(.immediate), .datastoreLocation(.applicationDefault)])
         }
     }
 }
