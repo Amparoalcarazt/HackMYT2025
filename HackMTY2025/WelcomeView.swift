@@ -37,7 +37,6 @@ struct WelcomeView: View {
                         .frame(height: 100)
                         .foregroundStyle(darkBlue)
                     
-                    // ✨ TÍTULO HERMOSO Y GRANDE ✨
                     VStack(spacing: 4) {
                         Text("Welcome to")
                             .font(.system(size: 20, weight: .medium))
