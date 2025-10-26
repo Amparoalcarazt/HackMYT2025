@@ -4,6 +4,7 @@
 //
 //  Created by Amparo Alcaraz Tonella on 25/10/25.
 //
+
 import SwiftUI
 import SwiftData
 
@@ -19,7 +20,8 @@ struct SettingsView: View {
         NavigationStack {
             Form {
                 Section {
-                    NavigationLink(destination: SignUpView()) {
+                    // ← CAMBIAR ESTO: de SignUpView() a ProfileView()
+                    NavigationLink(destination: ProfileView()) {
                         Label("Account settings", systemImage: "person.circle.fill")
                             .foregroundColor(midBlue)
                     }
@@ -32,17 +34,16 @@ struct SettingsView: View {
                         }
                     }
                     
-                    Picker("Select a currency", selection: $language) {
+                    Picker("Select a currency", selection: $currency) {  // ← ARREGLÉ ESTO (era $language)
                         ForEach(currencies, id: \.self) { currency in
                             Text(currency)
                         }
                     }
                 }
                 
-               
                 Section(header: Text("Notifications")) {
                     Toggle("Enable Notifications", isOn: $notificationsEnabled)
-                        .tint(midBlue) // optional: color of the switch
+                        .tint(midBlue)
                 }
                 
                 Section {
