@@ -1,4 +1,4 @@
-# 🪙 CrumbTrail
+# 🐜 CrumbTrail
 
 For many young adults, microexpenses quietly drain their wallets. It’s easy to spend small amounts here and there without realizing how much it adds up — like your daily coffee, snacks for study sessions, and many other small purchases.  
 
@@ -20,7 +20,7 @@ It enables users to **visualize their money flow** and offers **AI-driven guidan
 - **SwiftData** — Local data storage and management  
 - **Firebase** — Cloud database and user authentication  
 - **Figma** — UI/UX design and prototyping  
-- **Gemini API** — AI integration for financial insights through a chat
+- **Gemini API** — AI integration for financial insights 
 
 ---
 
@@ -29,7 +29,12 @@ It enables users to **visualize their money flow** and offers **AI-driven guidan
 - Track microexpenses and daily transactions effortlessly  
 - Visualize spending patterns over time  
 - Receive AI-powered suggestions to improve money habits  
-- Enjoy a clean, intuitive, and comforting interface  
+- Enjoy a clean, intuitive, and comforting interface
+
+## 💬 ChatBot Implementation
+
+The app includes an integrated chatbot that provides AI-guided financial advice.  
+It uses the **Gemini API** to process user input and respond naturally to questions about spending habits and budgeting.
 
 ---
 
