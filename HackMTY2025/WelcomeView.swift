@@ -6,98 +6,141 @@
 //
 
 import SwiftUI
-import FirebaseAuth  // backend
+import FirebaseAuth
 import SwiftData
 
 struct WelcomeView: View {
     @State private var email = ""
     @State private var password = ""
-    @State private var showError = false  // para backend
-    @State private var errorMessage = ""  // para backend
-    @State private var isLoading = false  // para backend
-    @State private var isLoggedIn = false // para backend
+    @State private var showError = false
+    @State private var errorMessage = ""
+    @State private var isLoading = false
+    @State private var isLoggedIn = false
     
     var body: some View {
         NavigationStack {
             ZStack {
                 lightBlue
                     .ignoresSafeArea()
+                
                 Image("LoginBg")
                     .scaledToFit()
                     .frame(maxWidth: .infinity)
-                VStack {
+                
+                VStack(spacing: 0) {
+                    Spacer()
+                    
+                    // Logo
                     Image("HormigaLogo")
-                        .frame(height: 120)
+                        .resizable()
+                        .scaledToFit()
+                        .frame(height: 100)
                         .foregroundStyle(darkBlue)
-                        .padding(30)
-                        .padding(.top, 40)
                     
-                    Text("Welcome to CrumbTrail")
+                    // ✨ TÍTULO HERMOSO Y GRANDE ✨
+                    VStack(spacing: 4) {
+                        Text("Welcome to")
+                            .font(.system(size: 20, weight: .medium))
+                            .foregroundColor(darkBlue.opacity(0.7))
+                        
+                        Text("CrumbTrail")
+                            .font(.system(size: 42, weight: .bold, design: .rounded))
+                            .foregroundStyle(
+                                LinearGradient(
+                                    colors: [darkBlue, midBlue],
+                                    startPoint: .leading,
+                                    endPoint: .trailing
+                                )
+                            )
+                            .shadow(color: midBlue.opacity(0.3), radius: 8, x: 0, y: 4)
+                    }
+                    .padding(.vertical, 20)
                     
-                    VStack(alignment: .center, spacing: 20) {
+                    Spacer()
+                    
+                    // Campos de entrada
+                    VStack(alignment: .center, spacing: 16) {
                         TextField("Email", text: $email)
                             .textFieldStyle(.roundedBorder)
-                            .autocapitalization(.none)  // backend
-                            .keyboardType(.emailAddress)  // backend
+                            .autocapitalization(.none)
+                            .keyboardType(.emailAddress)
                         
                         SecureField("Password", text: $password)
                             .textFieldStyle(.roundedBorder)
                     }
+                    .padding(.horizontal, 40)
                     
-                    // mensaje de error
+                    // Mensaje de error
                     if showError {
                         Text(errorMessage)
                             .foregroundColor(.red)
                             .font(.caption)
                             .multilineTextAlignment(.center)
-                            .padding(.horizontal)
+                            .padding(.horizontal, 40)
+                            .padding(.top, 8)
                     }
                     
-                    // forgot password
-                    NavigationLink(destination: ContentView()) {
-                        HStack() {
+                    // Forgot password
+                    HStack {
+                        NavigationLink(destination: ContentView()) {
                             Text("Forgot your password?")
+                                .font(.system(size: 14))
                                 .foregroundStyle(midBlue)
-                            Spacer()
                         }
+                        Spacer()
                     }
+                    .padding(.horizontal, 40)
+                    .padding(.top, 12)
                     
-                    // sign in button
+                    // Sign in button
                     Button(action: signIn) {
                         if isLoading {
                             ProgressView()
                                 .progressViewStyle(CircularProgressViewStyle(tint: .white))
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
                         } else {
                             Text("Sign in")
-                                .padding(10)
-                                .padding(.horizontal, 10)
+                                .font(.system(size: 18, weight: .semibold))
                                 .foregroundStyle(.white)
+                                .frame(maxWidth: .infinity)
+                                .frame(height: 50)
                         }
                     }
-                    .background(midBlue)
-                    .cornerRadius(20)
+                    .background(
+                        LinearGradient(
+                            colors: [midBlue, darkBlue],
+                            startPoint: .leading,
+                            endPoint: .trailing
+                        )
+                    )
+                    .cornerRadius(25)
+                    .shadow(color: midBlue.opacity(0.4), radius: 8, x: 0, y: 4)
                     .disabled(isLoading)
-                    .padding()
+                    .padding(.horizontal, 40)
+                    .padding(.top, 20)
                     
-                    // sign up link
+                    // Sign up link
                     NavigationLink(destination: SignUpView()) {
-                        Text("Don't have an account? Sign up!")
+                        Text("Don't have an account? ")
+                            .foregroundStyle(.gray)
+                            +
+                        Text("Sign up!")
                             .foregroundStyle(midBlue)
+                            .fontWeight(.semibold)
                     }
+                    .padding(.top, 16)
+                    
+                    Spacer()
                 }
-                .padding(.horizontal, 50)
             }
-            .scrollDismissesKeyboard(.interactively)
-            // NAVEGACION CUANDO LOGIN EXITOSO
             .navigationDestination(isPresented: $isLoggedIn) {
-                ContentView()  // pantalla principal después del login -> home
+                ContentView()
             }
         }
     }
     
-    // backend
     func signIn() {
-        // validar que los campos no estén vacíos
         guard !email.isEmpty, !password.isEmpty else {
             errorMessage = "Please fill in all fields"
             showError = true
@@ -107,18 +150,15 @@ struct WelcomeView: View {
         isLoading = true
         showError = false
         
-        // llamar a Firebase Authentication
         Auth.auth().signIn(withEmail: email, password: password) { result, error in
             isLoading = false
             
             if let error = error {
-                // mostrar error
                 errorMessage = error.localizedDescription
                 showError = true
                 return
             }
             
-            // usuario logueado
             print("User signed in: \(result?.user.email ?? "")")
             isLoggedIn = true
         }
