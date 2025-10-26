@@ -24,9 +24,6 @@ struct RemindersList: View {
             }
         }
         .padding()
-        
-        
-        
         .safeAreaInset(edge: .bottom) {
             VStack(alignment: .center, spacing: 10) {
                 Text("New Reminder")
